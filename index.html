@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datify — Collect your data, own your research.</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Datify">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1db954;
+  --green-dark:#17a349;
+  --black:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --surface3:#2a2a2a;
+  --text:#f5f5f5;
+  --muted:#888;
+  --border:#2a2a2a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:all .3s}
+nav.scrolled{background:rgba(10,10,10,.95);border-bottom-color:var(--border);backdrop-filter:blur(10px)}
+.nav-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green);letter-spacing:-.5px}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--green);color:#000;padding:10px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif}
+.nav-cta:hover{background:var(--green-dark);transform:scale(1.03)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 48px 80px;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(29,185,84,.12) 0%, transparent 70%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px, transparent 1px),linear-gradient(90deg, var(--border) 1px, transparent 1px);background-size:60px 60px;opacity:.3;pointer-events:none}
+.hero-content{position:relative;max-width:800px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.3);color:var(--green);padding:6px 16px;border-radius:100px;font-size:13px;font-weight:500;margin-bottom:32px;animation:fadeUp .6s ease both}
+.hero-badge span{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(42px,7vw,80px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:24px;animation:fadeUp .6s .1s ease both}
+h1 span{color:var(--green)}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:520px;margin:0 auto 40px;font-weight:300;animation:fadeUp .6s .2s ease both}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+.btn-hero{background:var(--green);color:#000;padding:16px 36px;border-radius:100px;font-size:16px;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-hero:hover{background:var(--green-dark);transform:translateY(-2px)}
+.btn-ghost{color:var(--text);padding:16px 36px;border-radius:100px;font-size:16px;font-weight:500;text-decoration:none;border:1px solid var(--border);transition:all .2s}
+.btn-ghost:hover{border-color:var(--muted);background:var(--surface)}
+.hero-stat{font-size:13px;color:var(--muted);margin-top:48px;animation:fadeUp .6s .4s ease both}
+
+/* MOCKUP */
+.mockup-section{padding:0 48px 100px;display:flex;justify-content:center}
+.mockup{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:900px;width:100%;box-shadow:0 40px 80px rgba(0,0,0,.6);animation:fadeUp .8s .2s ease both}
+.mockup-bar{background:var(--surface2);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.mockup-dot{width:10px;height:10px;border-radius:50%}
+.mockup-url{flex:1;background:var(--surface3);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--muted);margin:0 12px;text-align:center}
+.mockup-body{padding:24px}
+.mockup-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.mockup-logo{font-family:'Syne',sans-serif;font-weight:800;color:var(--green);font-size:16px}
+.mockup-user{font-size:12px;color:var(--muted);background:var(--surface3);padding:6px 12px;border-radius:100px}
+.mockup-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.mockup-stat{background:var(--surface2);border-radius:8px;padding:12px;border:1px solid var(--border)}
+.mockup-stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--green)}
+.mockup-stat-label{font-size:11px;color:var(--muted);margin-top:2px}
+.mockup-table{background:var(--surface2);border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.mockup-table-row{display:grid;grid-template-columns:30px 1fr 1fr 1fr 80px;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center}
+.mockup-table-row.header{color:var(--muted);font-size:11px;font-weight:600;background:var(--surface3)}
+.mockup-table-row:last-child{border-bottom:none}
+.chip{background:rgba(29,185,84,.15);color:var(--green);padding:2px 8px;border-radius:100px;font-size:11px;font-weight:500;display:inline-block}
+
+/* FEATURES */
+.features{padding:100px 48px;max-width:1100px;margin:0 auto}
+.section-label{font-size:13px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:60px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2px}
+.feature-card{background:var(--surface);padding:36px;position:relative;overflow:hidden;transition:background .2s}
+.feature-card:hover{background:var(--surface2)}
+.feature-card:first-child{border-radius:16px 0 0 0}
+.feature-card:nth-child(2){border-radius:0 16px 0 0}
+.feature-card:nth-child(3){border-radius:0}
+.feature-card:nth-child(4){border-radius:0}
+.feature-card:nth-child(5){border-radius:0 0 0 16px}
+.feature-card:last-child{border-radius:0 0 16px 0}
+.feature-icon{width:48px;height:48px;background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:20px}
+.feature-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px}
+.feature-desc{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* HOW IT WORKS */
+.how{padding:100px 48px;max-width:900px;margin:0 auto}
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:80px 1fr;gap:32px;position:relative;padding-bottom:48px}
+.step:last-child{padding-bottom:0}
+.step:not(:last-child)::after{content:'';position:absolute;left:39px;top:60px;bottom:0;width:1px;background:var(--border)}
+.step-num{width:48px;height:48px;background:var(--green);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;flex-shrink:0;margin-top:4px}
+.step-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px}
+.step-desc{color:var(--muted);font-size:15px}
+
+/* PRICING */
+.pricing{padding:100px 48px;max-width:900px;margin:0 auto;text-align:center}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:60px;border-radius:16px;overflow:hidden}
+.price-card{background:var(--surface);padding:48px 40px;text-align:left}
+.price-card.featured{background:var(--green);color:#000}
+.price-label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:16px}
+.price-card.featured .price-label{color:rgba(0,0,0,.6)}
+.price-amount{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
+.price-period{font-size:14px;color:var(--muted);margin-bottom:32px}
+.price-card.featured .price-period{color:rgba(0,0,0,.6)}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.price-features li{font-size:14px;display:flex;align-items:center;gap:10px;color:var(--muted)}
+.price-card.featured .price-features li{color:rgba(0,0,0,.8)}
+.price-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.price-card.featured .price-features li::before{color:#000}
+.price-btn{display:block;text-align:center;padding:14px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif}
+.price-btn-free{background:var(--surface3);color:var(--text);border:1px solid var(--border)}
+.price-btn-free:hover{background:var(--surface2)}
+.price-btn-pro{background:#000;color:var(--green)}
+.price-btn-pro:hover{background:#111}
+
+/* CTA */
+.cta{padding:100px 48px;text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%, rgba(29,185,84,.08) 0%, transparent 70%);pointer-events:none}
+.cta h2{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;position:relative}
+.cta p{color:var(--muted);font-size:18px;margin-bottom:40px;position:relative}
+
+/* FOOTER */
+footer{padding:40px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;color:var(--green);font-size:18px}
+.footer-text{font-size:13px;color:var(--muted)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  .hero{padding:100px 24px 60px}
+  .mockup-section{padding:0 24px 60px}
+  .mockup-stats{grid-template-columns:repeat(2,1fr)}
+  .mockup-table-row{grid-template-columns:30px 1fr 1fr 60px;gap:8px}
+  .mockup-table-row .col-hide{display:none}
+  .features{padding:60px 24px}
+  .features-grid{grid-template-columns:1fr;gap:1px}
+  .feature-card{border-radius:0!important}
+  .feature-card:first-child{border-radius:16px 16px 0 0!important}
+  .feature-card:last-child{border-radius:0 0 16px 16px!important}
+  .how{padding:60px 24px}
+  .pricing{padding:60px 24px}
+  .pricing-grid{grid-template-columns:1fr}
+  .cta{padding:60px 24px}
+  footer{padding:32px 24px;flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-logo">Datify</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works?</a>
+    <a href="#pricing">Pricing</a>
+    <a href="app.html" class="nav-cta">Get started free →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span></span> Built for researchers</div>
+    <h1>Collect your data,<br>focus on your <span>research.</span></h1>
+    <p class="hero-sub">Design your own form. Share with your team. Export to Excel. Thesis or clinical trial — ready in minutes with Datify.</p>
+    <div class="hero-actions">
+      <a href="app.html" class="btn-hero">Get started free →</a>
+      <a href="#how" class="btn-ghost">How it works?</a>
+    </div>
+    <div class="hero-stat">No credit card · No setup · Ready in 2 minutes</div>
+  </div>
+</section>
+
+<div class="mockup-section">
+  <div class="mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dot" style="background:#ff5f57"></div>
+      <div class="mockup-dot" style="background:#febc2e"></div>
+      <div class="mockup-dot" style="background:#28c840"></div>
+      <div class="mockup-url">dat1fy.netlify.app/app</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-topbar">
+        <div class="mockup-logo">Datify</div>
+        <div class="mockup-user">Dr. Özdemir ▾</div>
+      </div>
+      <div class="mockup-stats">
+        <div class="mockup-stat"><div class="mockup-stat-val">3</div><div class="mockup-stat-label">Çalışma</div></div>
+        <div class="mockup-stat"><div class="mockup-stat-val">124</div><div class="mockup-stat-label">Kayıt</div></div>
+        <div class="mockup-stat"><div class="mockup-stat-val">5</div><div class="mockup-stat-label">Ekip üyesi</div></div>
+        <div class="mockup-stat"><div class="mockup-stat-val">2</div><div class="mockup-stat-label">Excel export</div></div>
+      </div>
+      <div class="mockup-table">
+        <div class="mockup-table-row header">
+          <div>#</div><div>Ad Soyad</div><div>Tanı</div><div class="col-hide">LVEF %</div><div>Durum</div>
+        </div>
+        <div class="mockup-table-row">
+          <div style="color:#666">1</div><div>A. Yılmaz</div><div>KAH</div><div class="col-hide">58</div><div><span class="chip">Tam</span></div>
+        </div>
+        <div class="mockup-table-row">
+          <div style="color:#666">2</div><div>M. Demir</div><div>HT</div><div class="col-hide">62</div><div><span class="chip">Tam</span></div>
+        </div>
+        <div class="mockup-table-row">
+          <div style="color:#666">3</div><div>S. Kaya</div><div>DM+KAH</div><div class="col-hide">45</div><div><span class="chip">Tam</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- WHY DATIFY SECTION -->
+<section style="padding:80px 48px;max-width:1100px;margin:0 auto">
+  <div style="text-align:center;margin-bottom:60px">
+    <div style="font-size:13px;font-weight:600;color:#1db954;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Why Datify?</div>
+    <div style="font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.1;letter-spacing:-1px">REDCap is complex. Excel falls short.<br><span style="color:#1db954">Datify hits the sweet spot.</span></div>
+  </div>
+
+  <!-- Karşılaştırma tablosu -->
+  <div style="background:#141414;border-radius:16px;border:1px solid #2a2a2a;overflow:hidden;margin-bottom:60px">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;font-size:13px">
+      <!-- Header -->
+      <div style="padding:16px 20px;color:#666;font-weight:600;border-bottom:1px solid #2a2a2a"></div>
+      <div style="padding:16px 20px;text-align:center;color:#666;font-weight:600;border-bottom:1px solid #2a2a2a;border-left:1px solid #2a2a2a">Excel</div>
+      <div style="padding:16px 20px;text-align:center;color:#666;font-weight:600;border-bottom:1px solid #2a2a2a;border-left:1px solid #2a2a2a">REDCap</div>
+      <div style="padding:16px 20px;text-align:center;font-weight:700;border-bottom:1px solid #2a2a2a;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.08);color:#1db954">Datify</div>
+      <!-- Rows -->
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">2-minute setup</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#1db954">✓</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗ Requires IT</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">Team collaboration</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#f59e0b">~ Zor</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#1db954">✓</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">Conditional logic</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#1db954">✓</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">Audit trail (GCP)</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#1db954">✓</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">SPSS export</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#f59e0b">~ Manual</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">QR code data entry</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3;border-bottom:1px solid #1e1e1e">Patient tracking (longitudinal)</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#ef4444">✗</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;color:#1db954">✓</div>
+      <div style="padding:14px 20px;text-align:center;border-bottom:1px solid #1e1e1e;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">✓</div>
+
+      <div style="padding:14px 20px;color:#b3b3b3">Fiyat</div>
+      <div style="padding:14px 20px;text-align:center;border-left:1px solid #2a2a2a;color:#1db954">Ücretsiz</div>
+      <div style="padding:14px 20px;text-align:center;border-left:1px solid #2a2a2a;color:#f59e0b">Free*</div>
+      <div style="padding:14px 20px;text-align:center;border-left:1px solid #2a2a2a;background:rgba(29,185,84,.05);color:#1db954">$9/ay</div>
+    </div>
+  </div>
+
+  <!-- 3 güçlü mesaj -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:28px">
+      <div style="font-size:28px;margin-bottom:12px">⚡</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">10x faster than REDCap</div>
+      <div style="font-size:14px;color:#888;line-height:1.7">REDCap setup takes weeks and requires IT. With Datify, you build your first form in 2 minutes.</div>
+    </div>
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:28px">
+      <div style="font-size:28px;margin-bottom:12px">🔬</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Built for researchers</div>
+      <div style="font-size:14px;color:#888;line-height:1.7">GCP-compliant audit trail, SPSS export, multi-site support, patient tracking — from thesis students to clinical researchers.</div>
+    </div>
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:28px">
+      <div style="font-size:28px;margin-bottom:12px">💚</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Time to ditch Excel</div>
+      <div style="font-size:14px;color:#888;line-height:1.7">Enter data with your team simultaneously, view instant statistics, record bedside data with QR codes. Excel wasn't built for this.</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="features" id="features">
+  <div class="section-label">Features</div>
+  <div class="section-title">Everything a researcher<br>needs.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧩</div>
+      <div class="feature-title">Drag & drop form builder</div>
+      <div class="feature-desc">Text, number, date, checkbox, dropdown — add your own fields, reorder, edit. No coding required.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Team collaboration</div>
+      <div class="feature-desc">Multiple people can enter data simultaneously. Everyone connected to the same database, real-time sync.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Excel export</div>
+      <div class="feature-desc">Download all your data as Excel with one click. Clean columns, SPSS-ready export.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Güvenli & özel</div>
+      <div class="feature-desc">Each user only sees their own studies. Firebase infrastructure, Google security.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">Mobile ready</div>
+      <div class="feature-desc">Add as a mobile app, use on tablet or computer in the clinic. Works on every device.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Ready in 2 minutes</div>
+      <div class="feature-desc">Sign in with Google, create your study, start entering data. No setup, no IT department.</div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="section-label">How it works?</div>
+  <div class="section-title" style="margin-bottom:48px">Start in 3 steps.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Sign in with Google</div>
+        <div class="step-desc">No registration form, no email verification. Sign in with Google or email in seconds.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Design your form</div>
+        <div class="step-desc">Create a study, add your fields. Age, diagnosis, lab values, date — anything you want. No limits.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Enter data, export to Excel</div>
+        <div class="step-desc">Share with your team, enter data together. When done, export to Excel with one click and start analyzing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="section-label">Pricing</div>
+  <div class="section-title">Simple, transparent.</div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-label">Ücretsiz</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">free forever</div>
+      <ul class="price-features">
+        <li>1 çalışma</li>
+        <li>50 kayıt</li>
+        <li>5 alan tipi</li>
+        <li>Excel export</li>
+        <li>Mobile ready</li>
+      </ul>
+      <a href="app.html" class="price-btn price-btn-free">Get started free</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-label">Pro</div>
+      <div class="price-amount">$9</div>
+      <div class="price-period">/ month · $79/year</div>
+      <ul class="price-features">
+        <li>Unlimited studies</li>
+        <li>Unlimited records</li>
+        <li>Team sharing</li>
+        <li>Grafik & istatistik</li>
+        <li>Encryption</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="app.html" class="price-btn price-btn-pro">Try Pro →</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-bg"></div>
+  <h2>Start your research<br><span style="color:var(--green)">today.</span></h2>
+  <p>Say goodbye to Excel. Data collection has never been this easy.</p>
+  <a href="app.html" class="btn-hero">Get started free →</a>
+</section>
+
+<footer>
+  <div class="footer-logo">Datify</div>
+  <div class="footer-text">© 2026 Datify · Built for researchers 💚</div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+</script>
+</body>
+</html>
