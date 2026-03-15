@@ -357,7 +357,7 @@ function applyLang(){
             <span style="font-size:20px">🤖</span>
             <div>
               <div style="font-size:14px;font-weight:600;color:#1db954">AI ile form oluştur</div>
-              <div style="font-size:12px;color:#888">Çalışmanı anlat, Claude otomatik form oluştursun</div>
+              <div style="font-size:12px;color:#888">Çalışmanı anlat, Datify AI otomatik form oluştursun</div>
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1819,7 +1819,7 @@ window.generateFormWithAI=async function(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
-        system:`Sen bir araştırma formu tasarımcısısın. Kullanıcının açıkladığı klinik/akademik araştırma için uygun form alanları oluşturuyorsun.
+        system:`Sen Datify AI'sın — araştırma formu tasarımı konusunda uzman bir yapay zeka asistanısın. Kullanıcının açıkladığı klinik/akademik araştırma için uygun form alanları oluşturuyorsun.
 SADECE JSON döndür, başka hiçbir şey yazma. Format:
 {"fields":[{"label":"Alan Adı","type":"text|number|date|checkbox|dropdown","options":["A","B"],"required":true|false,"min":0,"max":100}]}
 - type: text, number, date, checkbox, dropdown
