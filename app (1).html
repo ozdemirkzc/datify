@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datify — Araştırma Veri Platformu</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#121212">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Datify">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#121212;color:#fff;font-size:15px}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{background:#282828;border-radius:16px;border:1px solid #333;padding:40px;width:100%;max-width:420px;text-align:center}
+.auth-logo{font-size:28px;font-weight:700;color:#1db954;margin-bottom:8px;font-size:32px}
+.auth-sub{font-size:14px;color:#b3b3b3;margin-bottom:32px}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#ccc;font-size:13px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#e5e5e3}
+.auth-input{width:100%;padding:10px 14px;border:1px solid #444;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;background:#333;color:#fff}
+.auth-input:focus{outline:none;border-color:#1db954;box-shadow:0 0 0 3px rgba(29,185,84,.15)}
+.auth-error{background:#fdecea;color:#c0392b;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;text-align:left}
+.auth-switch{font-size:13px;color:#b3b3b3;margin-top:16px}
+.auth-switch a{color:#1db954;cursor:pointer;text-decoration:none;font-weight:500}
+
+/* TOPBAR */
+.topbar{background:#000;border-bottom:1px solid #333;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;position:relative}
+.topbar-logo{font-size:16px;font-weight:700;color:#1db954}
+.topbar-user{font-size:13px;color:#b3b3b3;display:flex;align-items:center;gap:12px}
+
+/* LAYOUT */
+.container{max-width:900px;margin:0 auto;padding:28px 16px}
+
+/* BUTTONS */
+.btn{padding:9px 20px;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#1db954;color:#fff}
+.btn-primary:hover{background:#17a349}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:#333;color:#fff;border:1px solid #444}
+.btn-secondary:hover{background:#1a1a1a}
+.btn-danger{background:#333;color:#c0392b;border:1px solid #f5c6c6}
+.btn-danger:hover{background:#fff5f5}
+.btn-google{background:#333;color:#fff;border:1px solid #444;width:100%;justify-content:center;padding:11px;font-size:14px}
+.btn-google:hover{background:#1a1a1a}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* CARDS */
+.card{background:#282828;border-radius:12px;border:1px solid #333;padding:24px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600}
+
+/* STUDIES LIST */
+.study-item{background:#282828;border:1px solid #333;border-radius:10px;padding:18px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s}
+.study-item:hover{border-color:#1db954;background:#1a2a1a}
+.study-name{font-weight:600;font-size:15px}
+.study-meta{font-size:12px;color:#b3b3b3;margin-top:3px}
+.study-actions{display:flex;gap:8px}
+
+/* FORM BUILDER */
+.field-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.field-item{background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.field-drag{color:#ccc;cursor:grab;font-size:18px;line-height:1}
+.field-info{flex:1}
+.field-label{font-size:13px;font-weight:500}
+.field-type{font-size:11px;color:#b3b3b3;margin-top:2px}
+.field-actions{display:flex;gap:6px}
+
+/* ADD FIELD PANEL */
+.add-field-panel{background:#1a2a1a;border:1px dashed #1db954;border-radius:10px;padding:16px;margin-bottom:16px}
+.field-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.field-type-btn{padding:7px 14px;font-size:12px;font-weight:500;border-radius:20px;cursor:pointer;border:1px solid #444;background:#333;font-family:inherit}
+.field-type-btn.selected{background:#1db954;color:#fff;border-color:#1db954}
+.field-input-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.fi{padding:8px 12px;border:1px solid #444;border-radius:7px;font-size:13px;font-family:inherit;background:#333}
+.fi:focus{outline:none;border-color:#1db954}
+
+/* DATA ENTRY */
+.entry-form{display:flex;flex-direction:column;gap:14px}
+.entry-field label{display:block;font-size:13px;font-weight:500;color:#ddd;margin-bottom:5px}
+.entry-field input[type=text],
+.entry-field input[type=number],
+.entry-field input[type=date],
+.entry-field select,
+.entry-field textarea{width:100%;padding:8px 12px;border:1px solid #444;border-radius:7px;font-size:13px;font-family:inherit;background:#333}
+.entry-field input:focus,.entry-field select:focus{outline:none;border-color:#1db954;box-shadow:0 0 0 3px rgba(29,185,84,.15)}
+.checkbox-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #444;border-radius:7px;background:#333}
+.checkbox-row input{width:16px;height:16px;accent-color:#1db954}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:12px;font-weight:600;color:#b3b3b3;padding:10px 12px;border-bottom:1px solid #333;background:#1a1a1a;white-space:nowrap}
+.data-table td{padding:10px 12px;border-bottom:1px solid #f0f0ee;vertical-align:top}
+.data-table tr:hover td{background:#f5f8ff}
+.tbl-wrap{overflow-x:auto}
+
+/* MISC */
+.empty-state{text-align:center;padding:48px;color:#aaa;font-size:14px}
+.msg{padding:11px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;font-weight:500}
+.msg.success{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}
+.msg.error{background:#fdecea;color:#c0392b;border:1px solid #f5c6c6}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;background:#e8f0fe;color:#1db954;font-weight:500}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#aaa;cursor:pointer;margin-bottom:20px;padding:6px 0}
+.back-btn:hover{color:#1db954}
+.tabs{display:flex;gap:0;border-bottom:1px solid #333;margin-bottom:20px}
+.tab{padding:9px 18px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;color:#b3b3b3;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab.active{color:#1db954;border-bottom-color:#1db954;font-weight:600}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#282828;border-radius:14px;padding:28px;width:100%;max-width:440px}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:500;color:#aaa;margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:1px solid #444;border-radius:7px;font-size:13px;font-family:inherit}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#1db954}
+</style>
+
+<script>
+const LANG={
+  tr:{
+    appTitle:'Datify — Araştırma Veri Platformu',
+    authSub:'Araştırma veri toplama platformu',
+    authLoginBtn:'Giriş yap',authRegBtn:'Kayıt ol',
+    authNoAccount:'Hesabın yok mu?',authHaveAccount:'Hesabın var mı?',
+    authRegister:'Kayıt ol',authLogin:'Giriş yap',
+    authErrLogin:'Giriş başarısız. E-posta veya şifre hatalı.',
+    authErrFields:'Tüm alanları doldurunuz.',authErrPassword:'Şifre en az 6 karakter olmalı.',
+    myStudies:'Çalışmalarım',myStudiesSub:'Her çalışma için ayrı form ve veri tabanı',
+    newStudy:'+ Yeni çalışma',noStudies:'Henüz çalışma yok.<br>Yeni çalışma ekleyerek başlayın.',
+    backToStudies:'← Çalışmalarıma dön',backToPatients:'← Hastalara dön',backToStudy:'← Çalışmaya dön',
+    tabData:'Veriler',tabPatients:'👤 Hastalar',tabBuilder:'Form Düzenle',tabTeam:'👥 Ekip',tabStats:'📊 İstatistik',
+    addData:'+ Veri gir',excelDownload:'Excel indir',spssBtn:'SPSS için hazırla',importBtn:'⬆ Excel yükle',qrBtn:'📱 QR Kod',
+    newEntry:'Yeni kayıt',saveEntry:'💾 Kaydı kaydet',cancel:'İptal',
+    newPatient:'+ Yeni hasta',noPatients:'Henüz hasta kaydı yok.',
+    editBtn:'Düzenle',deleteBtn:'Sil',historyBtn:'📋',
+    planLabel:'Plan',planFree:'Ücretsiz',planUpgrade:"Pro'ya geç →",signOut:'Çıkış yap',
+    centerLabel:'Merkez',allCenters:'Tüm merkezler',
+    studyName:'Çalışma adı',studyDesc:'Açıklama (opsiyonel)',studyCenters:'Merkezler (opsiyonel)',
+    create:'Oluştur',save:'Kaydet',apply:'Uygula',close:'Kapat',
+    fieldRequired:'Zorunlu alan',fieldMin:'Min değer',fieldMax:'Max değer',
+    addField:'Ekle',saveForm:'Formu kaydet',noFields:'Henüz alan yok. Aşağıdan ekleyin.',
+    inviteEmail:'Ekip üyesinin e-postası',inviteBtn:'Davet et',removeMember:'Çıkar',
+    noMembers:'Henüz ekip üyesi yok.',
+    visitCount:'ziyaret',lastVisit:'Son:',visits:'Ziyaretler',newVisit:'+ Yeni ziyaret',noVisits:'Henüz ziyaret yok.',
+    uploadFile:'Yükle',importTitle:'Excel\'den veri yükle',
+    qrTitle:'📱 QR Kod ile Veri Giriş',qrDesc:'Bu QR kodu tara — direkt bu çalışmanın veri giriş formuna gidilir.',
+    qrDownload:'İndir',qrCopy:'Linki kopyala',
+    historyTitle:'📋 Değişiklik geçmişi',
+    condTitle:'⚡ Koşul ekle',condDesc:'Bir koşul belirle — koşul sağlanınca bu alan form içinde görünür, sağlanmayınca gizlenir.',
+    condSave:'Uygula',condRemove:'Koşulu sil',
+    followupPanel:'Yaklaşan takipler',today:'BUGÜN',days:' gün',openRecord:'→ kaydı aç',
+    welcome:'Datify\'a hoş geldin! 🎉',welcomeSub:'Başlamak için 3 adım yeterli',
+    ob1title:'Çalışmanı oluştur',ob2title:'Formunu tasarla',ob3title:'Veri gir & Excel\'e aktar',
+    skip:'Atla',next:'Devam →',back:'← Geri',start:'Başla! 🚀',
+    newStudyTitle:'Yeni çalışma oluştur',newPatientTitle:'👤 Yeni hasta ekle',
+    ptName:'Ad Soyad',ptId:'Hasta ID / TC (opsiyonel)',ptDob:'Doğum tarihi (opsiyonel)',ptNote:'Not (opsiyonel)',
+    saved:'Kaydedildi!',deleted:'Silindi.',copied:'Link kopyalandı!',
+    totalRecords:'Toplam kayıt',totalFields:'Alan sayısı',lastRecord:'Son kayıt',
+    noData:'Henüz veri yok.',noDataForm:'Form alanı tanımlanmamış.',
+    excelImported:' kayıt yüklendi!',
+  },
+  en:{
+    appTitle:'Datify — Research Data Platform',
+    authSub:'Research data collection platform',
+    authLoginBtn:'Sign in',authRegBtn:'Sign up',
+    authNoAccount:"Don't have an account?",authHaveAccount:'Already have an account?',
+    authRegister:'Sign up',authLogin:'Sign in',
+    authErrLogin:'Login failed. Incorrect email or password.',
+    authErrFields:'Please fill in all fields.',authErrPassword:'Password must be at least 6 characters.',
+    myStudies:'My Studies',myStudiesSub:'Separate form and database for each study',
+    newStudy:'+ New study',noStudies:'No studies yet.<br>Create a new study to get started.',
+    backToStudies:'← Back to studies',backToPatients:'← Back to patients',backToStudy:'← Back to study',
+    tabData:'Data',tabPatients:'👤 Patients',tabBuilder:'Edit Form',tabTeam:'👥 Team',tabStats:'📊 Statistics',
+    addData:'+ Add entry',excelDownload:'Download Excel',spssBtn:'Export for SPSS',importBtn:'⬆ Import Excel',qrBtn:'📱 QR Code',
+    newEntry:'New entry',saveEntry:'💾 Save entry',cancel:'Cancel',
+    newPatient:'+ New patient',noPatients:'No patients yet.',
+    editBtn:'Edit',deleteBtn:'Delete',historyBtn:'📋',
+    planLabel:'Plan',planFree:'Free',planUpgrade:'Upgrade to Pro →',signOut:'Sign out',
+    centerLabel:'Site',allCenters:'All sites',
+    studyName:'Study name',studyDesc:'Description (optional)',studyCenters:'Sites (optional)',
+    create:'Create',save:'Save',apply:'Apply',close:'Close',
+    fieldRequired:'Required field',fieldMin:'Min value',fieldMax:'Max value',
+    addField:'Add',saveForm:'Save form',noFields:'No fields yet. Add below.',
+    inviteEmail:"Team member's email",inviteBtn:'Invite',removeMember:'Remove',
+    noMembers:'No team members yet.',
+    visitCount:'visits',lastVisit:'Last:',visits:'Visits',newVisit:'+ New visit',noVisits:'No visits yet.',
+    uploadFile:'Upload',importTitle:'Import from Excel',
+    qrTitle:'📱 QR Code Data Entry',qrDesc:'Scan this QR code to go directly to this study\'s data entry form.',
+    qrDownload:'Download',qrCopy:'Copy link',
+    historyTitle:'📋 Change history',
+    condTitle:'⚡ Add condition',condDesc:'Set a condition — this field will appear when the condition is met, hidden otherwise.',
+    condSave:'Apply',condRemove:'Remove condition',
+    followupPanel:'Upcoming follow-ups',today:'TODAY',days:' days',openRecord:'→ open record',
+    welcome:'Welcome to Datify! 🎉',welcomeSub:'3 steps to get started',
+    ob1title:'Create your study',ob2title:'Design your form',ob3title:'Enter data & export to Excel',
+    skip:'Skip',next:'Next →',back:'← Back',start:'Get started! 🚀',
+    newStudyTitle:'Create new study',newPatientTitle:'👤 Add new patient',
+    ptName:'Full name',ptId:'Patient ID (optional)',ptDob:'Date of birth (optional)',ptNote:'Note (optional)',
+    saved:'Saved!',deleted:'Deleted.',copied:'Link copied!',
+    totalRecords:'Total records',totalFields:'Fields',lastRecord:'Last record',
+    noData:'No data yet.',noDataForm:'No form fields defined.',
+    excelImported:' records imported!',
+  }
+};
+let currentLang=localStorage.getItem('datify_lang')||'tr';
+function t(key){return LANG[currentLang][key]||LANG['tr'][key]||key;}
+function setLang(lang){
+  currentLang=lang;
+  localStorage.setItem('datify_lang',lang);
+  applyLang();
+}
+function applyLang(){
+  document.title=t('appTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=t(key);
+    else el.innerHTML=t(key);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=t(el.getAttribute('data-i18n-ph'));});
+}
+</script>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">Datify</div>
+    <div class="auth-sub">Collect your data, own your research.</div>
+
+    <div id="auth-error" class="auth-error" style="display:none"></div>
+
+    <div id="auth-google">
+      <button class="btn btn-google" onclick="signInGoogle()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google ile giriş yap
+      </button>
+      <div class="auth-divider">veya</div>
+    </div>
+
+    <div id="auth-login">
+      <input class="auth-input" id="auth-email" type="email" placeholder="E-posta">
+      <input class="auth-input" id="auth-password" type="password" placeholder="Şifre">
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="signInEmail()">Giriş yap</button>
+      <div class="auth-switch">Hesabın yok mu? <a onclick="showRegister()">Kayıt ol</a></div>
+    </div>
+
+    <div id="auth-register" style="display:none">
+      <input class="auth-input" id="reg-name" type="text" placeholder="Ad Soyad">
+      <input class="auth-input" id="reg-email" type="email" placeholder="E-posta">
+      <input class="auth-input" id="reg-password" type="password" placeholder="Şifre (min 6 karakter)">
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="registerEmail()">Kayıt ol</button>
+      <div class="auth-switch">Hesabın var mı? <a onclick="showLogin()">Giriş yap</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-logo"><img src="/icon-192.png" style="width:28px;height:28px;border-radius:6px;vertical-align:middle;margin-right:8px">Datify</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="setLang(currentLang==='tr'?'en':'tr');document.getElementById('lang-btn').textContent=currentLang==='tr'?'EN':'TR'" style="background:#1e1e1e;border:1px solid #333;color:#b3b3b3;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit" id="lang-btn">EN</button>
+      <div class="topbar-user">
+        <div onclick="toggleProfile()" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid #2a2a2a;transition:background .15s" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background='transparent'">
+          <div id="user-avatar" style="width:28px;height:28px;border-radius:50%;background:#1db954;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0"></div>
+          <span id="user-name" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <span style="color:#666;font-size:10px">▾</span>
+        </div>
+        <!-- Profile dropdown -->
+        <div id="profile-dropdown" style="display:none;position:absolute;top:62px;right:24px;background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:4px;min-width:240px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+          <div style="padding:14px 16px;border-bottom:1px solid #2a2a2a">
+            <div id="profile-name" style="font-size:14px;font-weight:600;color:#fff;margin-bottom:2px"></div>
+            <div id="profile-email" style="font-size:12px;color:#888"></div>
+          </div>
+          <div style="padding:10px 16px;border-bottom:1px solid #2a2a2a">
+            <div style="font-size:11px;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em" data-i18n="planLabel">Plan</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="background:rgba(29,185,84,.15);color:#1db954;font-size:12px;font-weight:600;padding:3px 10px;border-radius:100px" data-i18n="planFree">Ücretsiz</span>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:#1db954;cursor:pointer" data-i18n="planUpgrade" onclick="alert('Coming soon!')">Pro\'ya geç →</div>
+          </div>
+          <div style="padding:4px">
+            <button onclick="signOut()" data-i18n="signOut" style="width:100%;text-align:left;padding:10px 12px;font-size:13px;color:#ef4444;background:transparent;border:none;border-radius:8px;cursor:pointer;font-family:inherit" onmouseover="this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.background='transparent'">Çıkış yap</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="msg-area"></div>
+    <div id="followup-panel" style="display:none;background:#2a1f00;border:1px solid #f59e0b;border-radius:12px;padding:14px 18px;margin-bottom:16px"></div>
+
+    <!-- STUDIES LIST -->
+    <div id="view-studies">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:20px;font-weight:700" data-i18n="myStudies">Çalışmalarım</h2>
+          <div style="font-size:13px;color:#b3b3b3;margin-top:2px" data-i18n="myStudiesSub">Her çalışma için ayrı form ve veri tabanı</div>
+        </div>
+        <button class="btn btn-primary" onclick="showNewStudyModal()" data-i18n="newStudy">+ Yeni çalışma</button>
+      </div>
+      <div id="studies-list"><div class="empty-state">Henüz çalışma yok.<br>Yeni çalışma ekleyerek başlayın.</div></div>
+    </div>
+
+    <!-- STUDY DETAIL -->
+    <div id="view-study" style="display:none">
+      <div class="back-btn" onclick="showView('studies')" data-i18n="backToStudies">← Çalışmalarıma dön</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <h2 id="study-title" style="font-size:20px;font-weight:700"></h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="showView('entry')" data-i18n="addData">+ Veri gir</button>
+          <button class="btn btn-secondary btn-sm" onclick="showQR()" data-i18n="qrBtn">📱 QR Kod</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportXLSX()" data-i18n="excelDownload">Excel indir</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportSPSS()" data-i18n="spssBtn">SPSS için hazırla</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file-input').click()" data-i18n="importBtn">⬆ Excel yükle</button>
+          <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(event)">
+        </div>
+      </div>
+      <div id="study-desc" style="font-size:13px;color:#b3b3b3;margin-bottom:20px"></div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('data')" data-i18n="tabData">Veriler</button>
+        <button class="tab" onclick="switchTab('patients')" data-i18n="tabPatients">👤 Hastalar</button>
+        <button class="tab" id="tab-btn-builder" onclick="switchTab('builder')" data-i18n="tabBuilder">Form Düzenle</button>
+        <button class="tab" id="tab-btn-team" onclick="switchTab('team')" style="display:none" data-i18n="tabTeam">👥 Ekip</button>
+        <button class="tab" onclick="switchTab('stats')" data-i18n="tabStats">📊 İstatistik</button>
+      </div>
+
+      <!-- DATA VIEW -->
+      <div id="tab-data">
+        <div id="center-filter-wrap" style="display:none;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:13px;color:#b3b3b3">Merkez:</span>
+          <div id="center-filter-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div id="data-container"><div class="empty-state">Henüz veri yok.<br>"+ Veri gir" ile ilk kaydı ekleyin.</div></div>
+      </div>
+
+      <!-- PATIENTS TAB -->
+      <div id="tab-patients" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="showNewPatientModal()">+ Yeni hasta</button>
+        </div>
+        <div id="patients-container"><div class="empty-state">Henüz hasta kaydı yok.</div></div>
+      </div>
+
+      <!-- FORM BUILDER -->
+      <div id="tab-builder" style="display:none">
+        <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(29,185,84,.08),rgba(29,185,84,.03));border-color:rgba(29,185,84,.3)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <span style="font-size:20px">🤖</span>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#1db954">AI ile form oluştur</div>
+              <div style="font-size:12px;color:#888">Çalışmanı anlat, Datify AI otomatik form oluştursun</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <textarea id="ai-prompt" placeholder="Örn: Tip 2 diyabet hastalarında kardiyovasküler risk faktörleri çalışması. Demografik bilgiler, kan basıncı, lab değerleri, ilaç kullanımı gerekli." style="flex:1;min-width:200px;min-height:80px;background:#1a1a1a;color:#ddd;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="generateFormWithAI()" id="ai-gen-btn" style="align-self:flex-end;white-space:nowrap">✨ Oluştur</button>
+          </div>
+          <div id="ai-preview" style="display:none;margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Form alanları</div>
+            <span id="field-count" class="badge">0 alan</span>
+          </div>
+          <div id="field-list" class="field-list"></div>
+
+          <div class="add-field-panel">
+            <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:#1db954">Yeni alan ekle</div>
+            <div class="field-types">
+              <button class="field-type-btn selected" id="ftype-text" onclick="selectType('text')">Metin</button>
+              <button class="field-type-btn" id="ftype-number" onclick="selectType('number')">Sayı</button>
+              <button class="field-type-btn" id="ftype-date" onclick="selectType('date')">Tarih</button>
+              <button class="field-type-btn" id="ftype-checkbox" onclick="selectType('checkbox')">Checkbox</button>
+              <button class="field-type-btn" id="ftype-dropdown" onclick="selectType('dropdown')">Dropdown</button>
+            </div>
+            <div class="field-input-row">
+              <input class="fi" id="new-field-label" placeholder="Alan adı (örn: Yaş, Tanı, Merkez...)" style="flex:1;min-width:180px">
+              <input class="fi" id="new-field-options" placeholder="Seçenekler: A,B,C" style="flex:1;min-width:160px;display:none">
+              <button class="btn btn-primary btn-sm" onclick="addField()">Ekle</button>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;align-items:center">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+                <input type="checkbox" id="new-field-required" style="width:15px;height:15px;accent-color:#1db954"> Zorunlu alan
+              </label>
+              <div id="new-field-validation-wrap" style="display:flex;gap:8px;flex-wrap:wrap">
+                <input class="fi" id="new-field-min" placeholder="Min değer" style="width:100px;display:none">
+                <input class="fi" id="new-field-max" placeholder="Max değer" style="width:100px;display:none">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="saveFields()" id="save-fields-btn" data-i18n="saveForm">Formu kaydet</button>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div id="tab-team" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Ekip üyeleri</div>
+            <span class="badge" id="member-count">0 üye</span>
+          </div>
+          <div style="font-size:13px;color:#b3b3b3;margin-bottom:16px">Ekip üyeleri veri girebilir ve düzenleyebilir. Form düzenleme ve ekip yönetimi sadece sende.</div>
+          <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:12px;color:#666;margin-bottom:4px">E-posta</div>
+              <input class="fi" id="invite-email" placeholder="Ekip üyesinin e-postası" style="width:100%">
+            </div>
+            <div id="invite-center-wrap" style="min-width:140px">
+              <div style="font-size:12px;color:#666;margin-bottom:4px">Merkez</div>
+              <select id="invite-center" class="fi" style="width:100%">
+                <option value="">Tüm merkezler</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="inviteMember()" style="height:36px">Davet et</button>
+          </div>
+          <div id="member-list"></div>
+        </div>
+        <div class="card" id="centers-card" style="display:none">
+          <div class="card-header"><div class="card-title">Merkezler</div></div>
+          <div id="centers-list"></div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div id="tab-stats" style="display:none">
+        <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px"></div>
+        <!-- Stats sub-tabs -->
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+          <button onclick="switchStatTab('charts')" id="stab-charts" style="padding:6px 16px;font-size:13px;border-radius:100px;cursor:pointer;border:1px solid #1db954;background:rgba(29,185,84,.15);color:#1db954;font-family:inherit">Grafikler</button>
+          <button onclick="switchStatTab('crosstab')" id="stab-crosstab" style="padding:6px 16px;font-size:13px;border-radius:100px;cursor:pointer;border:1px solid #333;background:transparent;color:#888;font-family:inherit">Çapraz Tablo</button>
+          <button onclick="switchStatTab('correlation')" id="stab-correlation" style="padding:6px 16px;font-size:13px;border-radius:100px;cursor:pointer;border:1px solid #333;background:transparent;color:#888;font-family:inherit">Korelasyon</button>
+        </div>
+        <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px"></div>
+        <div id="stats-crosstab" style="display:none"></div>
+        <div id="stats-correlation" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- PATIENT DETAIL VIEW -->
+    <div id="view-patient" style="display:none">
+      <div class="back-btn" onclick="showView('study');switchTab('patients')" data-i18n="backToPatients">← Hastalara dön</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 id="patient-name-title" style="font-size:20px;font-weight:700"></h2>
+          <div id="patient-meta" style="font-size:13px;color:#b3b3b3;margin-top:4px"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="newVisit()" data-i18n="newVisit">+ Yeni ziyaret</button>
+      </div>
+      <div id="visits-container"></div>
+    </div>
+
+    <!-- DATA ENTRY -->
+    <div id="view-entry" style="display:none">
+      <div class="back-btn" onclick="showView('study')" data-i18n="backToStudy">← Çalışmaya dön</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" id="entry-title" data-i18n="newEntry">Yeni kayıt</div>
+        </div>
+        <div id="entry-form" class="entry-form"></div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0ee;display:flex;gap:10px">
+          <button class="btn btn-primary" id="save-entry-btn" onclick="saveEntry()" data-i18n="saveEntry">💾 Kaydı kaydet</button>
+          <button class="btn btn-secondary" onclick="showView('study')">İptal</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NEW PATIENT MODAL -->
+<div id="modal-new-patient" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">👤 Yeni hasta ekle</div>
+    <div class="form-group"><label>Ad Soyad *</label><input id="pt-name" placeholder="Ahmet Yılmaz"></div>
+    <div class="form-group"><label>Hasta ID / TC (opsiyonel)</label><input id="pt-id" placeholder="12345678901"></div>
+    <div class="form-group"><label>Doğum tarihi (opsiyonel)</label><input id="pt-dob" type="date"></div>
+    <div class="form-group"><label>Not (opsiyonel)</label><input id="pt-note" placeholder="Ek bilgi..."></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-primary" onclick="createPatient()">Ekle</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-new-patient').style.display='none'">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW STUDY MODAL -->
+<div id="modal-new-study" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Yeni çalışma oluştur</div>
+    <div class="form-group">
+      <label>Çalışma adı *</label>
+      <input id="new-study-name" placeholder="örn: Diyabet ve Kardiyovasküler Risk">
+    </div>
+    <div class="form-group">
+      <label>Açıklama (opsiyonel)</label>
+      <textarea id="new-study-desc" placeholder="Kısa açıklama..." style="resize:vertical;min-height:70px"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Merkezler (opsiyonel)</label>
+      <input id="new-study-centers" placeholder="örn: İzmir, Kocaeli, Ankara (virgülle ayır)">
+      <div style="font-size:12px;color:#666;margin-top:4px">Çok merkezli çalışma için merkezleri gir. Ekip üyelerini merkeze atayabilirsin.</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-primary" onclick="createStudy()">Oluştur</button>
+      <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL -->
+<div id="modal-onboarding" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:500px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:system-ui;font-size:28px;font-weight:800;color:#1db954;margin-bottom:8px">Datify'a hoş geldin! 🎉</div>
+      <div style="font-size:14px;color:#b3b3b3">Başlamak için 3 adım yeterli</div>
+    </div>
+    <div id="onboarding-steps">
+      <!-- Step 1 -->
+      <div id="ob-step-1">
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px">
+          <div style="width:40px;height:40px;background:#1db954;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000;flex-shrink:0">1</div>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Çalışmanı oluştur</div>
+            <div style="font-size:13px;color:#888">Her araştırma için ayrı bir çalışma açıyorsun. İsim ver, açıklama ekle.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">2</div>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px;color:#666">Formunu tasarla</div>
+            <div style="font-size:13px;color:#555">Hangi verileri toplayacaksın? Alanları sen belirle.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">3</div>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px;color:#666">Veri gir & Excel'e aktar</div>
+            <div style="font-size:13px;color:#555">Ekibinle birlikte veri girin, istediğinde Excel'e alın.</div>
+          </div>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-secondary" onclick="closeOnboarding()">Atla</button>
+          <button class="btn btn-primary" onclick="obNext(2)">Devam →</button>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div id="ob-step-2" style="display:none">
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">1</div>
+          <div><div style="font-weight:600;margin-bottom:4px;color:#666">Çalışmanı oluştur</div></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px">
+          <div style="width:40px;height:40px;background:#1db954;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000;flex-shrink:0">2</div>
+          <div>
+            <div style="font-weight:600;margin-bottom:6px">Formunu tasarla</div>
+            <div style="font-size:13px;color:#888;margin-bottom:10px">Çalışmana girdikten sonra <b style="color:#1db954">Form Düzenle</b> sekmesine tıkla.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span style="background:#2a2a2a;border-radius:6px;padding:4px 10px;font-size:12px">Metin</span>
+              <span style="background:#2a2a2a;border-radius:6px;padding:4px 10px;font-size:12px">Sayı</span>
+              <span style="background:#2a2a2a;border-radius:6px;padding:4px 10px;font-size:12px">Tarih</span>
+              <span style="background:#2a2a2a;border-radius:6px;padding:4px 10px;font-size:12px">Checkbox</span>
+              <span style="background:#2a2a2a;border-radius:6px;padding:4px 10px;font-size:12px">Dropdown</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">3</div>
+          <div><div style="font-weight:600;margin-bottom:4px;color:#666">Veri gir & Excel'e aktar</div></div>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-secondary" onclick="obNext(1)">← Geri</button>
+          <button class="btn btn-primary" onclick="obNext(3)">Devam →</button>
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div id="ob-step-3" style="display:none">
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">1</div>
+          <div><div style="font-weight:600;margin-bottom:4px;color:#666">Çalışmanı oluştur</div></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;background:#1e1e1e;border-radius:12px;padding:16px;opacity:.5">
+          <div style="width:40px;height:40px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#666;flex-shrink:0">2</div>
+          <div><div style="font-weight:600;margin-bottom:4px;color:#666">Formunu tasarla</div></div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;background:#1e1e1e;border-radius:12px;padding:16px">
+          <div style="width:40px;height:40px;background:#1db954;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000;flex-shrink:0">3</div>
+          <div>
+            <div style="font-weight:600;margin-bottom:6px">Veri gir & Excel'e aktar</div>
+            <div style="font-size:13px;color:#888;margin-bottom:8px">Sağ üstten <b style="color:#1db954">+ Veri gir</b> butonu ile kayıt ekle.</div>
+            <div style="font-size:13px;color:#888;margin-bottom:8px">Ekibini <b style="color:#1db954">👥 Ekip</b> sekmesinden davet et — birlikte veri girin.</div>
+            <div style="font-size:13px;color:#888"><b style="color:#1db954">Excel indir</b> ile tüm veriyi dışa aktar, istatistikleri gör.</div>
+          </div>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-secondary" onclick="obNext(2)">← Geri</button>
+          <button class="btn btn-primary" onclick="closeOnboarding()">Başla! 🚀</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div id="modal-qr" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div class="modal-title">📱 QR Kod ile Veri Giriş</div>
+    <div style="font-size:13px;color:#b3b3b3;margin-bottom:20px">Bu QR kodu tara — direkt bu çalışmanın veri giriş formuna gidilir.</div>
+    <div id="qr-container" style="background:#fff;border-radius:12px;padding:20px;display:inline-block;margin-bottom:16px"></div>
+    <div id="qr-link" style="font-size:11px;color:#666;word-break:break-all;margin-bottom:16px;padding:8px;background:#1e1e1e;border-radius:8px"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-primary btn-sm" onclick="downloadQR()">İndir</button>
+      <button class="btn btn-secondary btn-sm" onclick="copyQRLink()">Linki kopyala</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modal-qr').style.display='none'">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div id="modal-history" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:560px;max-height:85vh;overflow-y:auto">
+    <div class="modal-title">📋 Değişiklik geçmişi</div>
+    <div id="history-content"></div>
+    <div style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-history').style.display='none'">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONDITION MODAL -->
+<div id="modal-condition" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">⚡ Koşul ekle</div>
+    <div style="font-size:13px;color:#b3b3b3;margin-bottom:16px">Bir koşul belirle — koşul sağlanınca bu alan form içinde görünür, sağlanmayınca gizlenir.</div>
+    <div id="condition-field-name" style="font-size:14px;font-weight:600;color:#1db954;margin-bottom:16px"></div>
+    <div class="form-group">
+      <label>Hangi alan değişince?</label>
+      <select id="cond-source-field" onchange="updateCondValueInput()" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%">
+        <option value="">— Alan seç —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Koşul</label>
+      <select id="cond-op" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%">
+        <option value="eq">eşittir (=)</option>
+        <option value="neq">eşit değildir (≠)</option>
+      </select>
+    </div>
+    <div class="form-group" id="cond-value-group">
+      <label>Değer</label>
+      <input id="cond-value" placeholder="Karşılaştırılacak değer" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%">
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:16px;padding:10px;background:#1e1e1e;border-radius:8px">
+      <b style="color:#f59e0b">Örnek:</b> "Sigara içiyor mu?" = "Evet" ise bu alan gösterilsin.<br>
+      Checkbox için: <b style="color:#ddd">true</b> veya <b style="color:#ddd">false</b> yaz.
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="saveCondition()">Uygula</button>
+      <button class="btn btn-secondary" onclick="removeCondition()">Koşulu sil</button>
+      <button class="btn btn-secondary" onclick="closeConditionModal()">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="modal-import" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:560px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title">Excel'den veri yükle</div>
+    <div id="import-step-1">
+      <div style="font-size:13px;color:#b3b3b3;margin-bottom:16px">Dosyadaki sütunları form alanlarınla eşleştir. Eşleştirilmeyen sütunlar atlanır.</div>
+      <div id="import-mapping"></div>
+      <div style="margin-top:8px;padding:10px 12px;background:#1e1e1e;border-radius:8px;font-size:12px;color:#666" id="import-preview-info"></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="doImport()" id="import-confirm-btn">Yükle</button>
+        <button class="btn btn-secondary" onclick="closeImportModal()">İptal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('L42AhIQ7PUrMmtrm-');</script>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,createUserWithEmailAndPassword,updateProfile,signOut as fbSignOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,addDoc,updateDoc,deleteDoc,doc,getDocs,onSnapshot,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const cfg={apiKey:"AIzaSyBk-2m54kTFW0H_FXn3-3puyQoPbYX3ZPM",authDomain:"datify-61cc8.firebaseapp.com",projectId:"datify-61cc8",storageBucket:"datify-61cc8.firebasestorage.app",messagingSenderId:"546836587120",appId:"1:546836587120:web:5f5f89d041feae165e0ab5"};
+const app=initializeApp(cfg);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const provider=new GoogleAuthProvider();
+
+let currentUser=null;
+let currentStudy=null;
+let studies=[];
+let records=[];
+let fields=[];
+let selectedType='text';
+let editingRecordId=null;
+
+// AUTH STATE
+onAuthStateChanged(auth,user=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('user-name').textContent=user.displayName||user.email.split('@')[0];
+    document.getElementById('user-avatar').textContent=(user.displayName||user.email)[0].toUpperCase();
+    document.getElementById('profile-name').textContent=user.displayName||'Kullanıcı';
+    document.getElementById('profile-email').textContent=user.email;
+    applyLang();
+    document.getElementById('lang-btn').textContent=currentLang==='tr'?'EN':'TR';
+    // Onboarding: sadece ilk girişte göster
+    const obKey='datify_ob_'+user.uid;
+    if(!localStorage.getItem(obKey)){
+      document.getElementById('modal-onboarding').style.display='flex';
+    }
+    loadStudies();
+    // QR yönlendirmesi
+    if(window._qrStudyId){
+      setTimeout(()=>{
+        const s=studies.find(x=>x.id===window._qrStudyId);
+        if(s){openStudy(window._qrStudyId);setTimeout(()=>showView('entry'),400);}
+        window._qrStudyId=null;
+      },1500);
+    }
+  } else {
+    currentUser=null;
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+window.obNext=function(step){
+  [1,2,3].forEach(i=>document.getElementById('ob-step-'+i).style.display='none');
+  document.getElementById('ob-step-'+step).style.display='block';
+};
+
+window.closeOnboarding=function(){
+  document.getElementById('modal-onboarding').style.display='none';
+  if(currentUser)localStorage.setItem('datify_ob_'+currentUser.uid,'1');
+};
+
+// AUTH FUNCTIONS
+window.signInGoogle=async function(){
+  try{await signInWithPopup(auth,provider);}
+  catch(e){showAuthError(e.message);}
+};
+
+window.signInEmail=async function(){
+  const email=document.getElementById('auth-email').value;
+  const pass=document.getElementById('auth-password').value;
+  if(!email||!pass){showAuthError('E-posta ve şifre giriniz.');return;}
+  try{await signInWithEmailAndPassword(auth,email,pass);}
+  catch(e){showAuthError('Giriş başarısız. E-posta veya şifre hatalı.');}
+};
+
+window.registerEmail=async function(){
+  const name=document.getElementById('reg-name').value;
+  const email=document.getElementById('reg-email').value;
+  const pass=document.getElementById('reg-password').value;
+  if(!name||!email||!pass){showAuthError('Tüm alanları doldurunuz.');return;}
+  if(pass.length<6){showAuthError('Şifre en az 6 karakter olmalı.');return;}
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+  }catch(e){showAuthError('Kayıt başarısız: '+e.message);}
+};
+
+window.signOut=async function(){await fbSignOut(auth);};
+window.toggleProfile=function(){
+  const d=document.getElementById('profile-dropdown');
+  d.style.display=d.style.display==='none'?'block':'none';
+};
+// Dışarı tıklayınca kapat
+document.addEventListener('click',e=>{
+  const dd=document.getElementById('profile-dropdown');
+  if(dd&&!e.target.closest('#profile-dropdown')&&!e.target.closest('[onclick="toggleProfile()"]'))dd.style.display='none';
+});
+window.showRegister=function(){document.getElementById('auth-login').style.display='none';document.getElementById('auth-register').style.display='block';document.getElementById('auth-error').style.display='none';};
+window.showLogin=function(){document.getElementById('auth-register').style.display='none';document.getElementById('auth-login').style.display='block';document.getElementById('auth-error').style.display='none';};
+function showAuthError(msg){const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';}
+
+// STUDIES
+async function loadStudies(){
+  const q1=query(collection(db,'studies'),where('uid','==',currentUser.uid),orderBy('createdAt','desc'));
+  const q2=query(collection(db,'studies'),where('members','array-contains',currentUser.email),orderBy('createdAt','desc'));
+  onSnapshot(q1,snap1=>{
+    const owned=snap1.docs.map(d=>({...d.data(),id:d.id,role:'owner'}));
+    getDocs(q2).then(snap2=>{
+      const shared=snap2.docs.filter(d=>d.data().uid!==currentUser.uid).map(d=>({...d.data(),id:d.id,role:'member'}));
+      studies=[...owned,...shared];
+      studies.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      renderStudies();
+      checkFollowups();
+    });
+  });
+}
+
+async function checkFollowups(){
+  const panel=document.getElementById('followup-panel');
+  const today=new Date();today.setHours(0,0,0,0);
+  const in7=new Date(today);in7.setDate(in7.getDate()+7);
+  const alerts=[];
+  for(const study of studies){
+    const dateFields=(study.fields||[]).filter(f=>f.type==='date');
+    if(!dateFields.length)continue;
+    try{
+      const q=query(collection(db,'records'),where('studyId','==',study.id));
+      const snap=await getDocs(q);
+      snap.docs.forEach(d=>{
+        const r=d.data();
+        dateFields.forEach(f=>{
+          const val=r[f.id];
+          if(!val)return;
+          const dt=new Date(val);dt.setHours(0,0,0,0);
+          if(dt>=today&&dt<=in7){
+            const diff=Math.round((dt-today)/(1000*60*60*24));
+            alerts.push({study:study.name,studyId:study.id,recordId:d.id,field:f.label,date:val,diff});
+          }
+        });
+      });
+    }catch(e){}
+  }
+  if(!alerts.length){panel.style.display='none';return;}
+  panel.style.display='block';
+  panel.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="font-size:18px">⏰</span>
+    <span style="font-weight:600;color:#f59e0b">Yaklaşan takipler (${alerts.length})</span>
+  </div>`+alerts.map(a=>`
+    <div onclick="window._ep('${a.recordId}','${a.studyId}')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(245,158,11,.08);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(245,158,11,.18)'" onmouseout="this.style.background='rgba(245,158,11,.08)'">
+      <div>
+        <span style="color:#f59e0b;font-weight:500">${a.study}</span>
+        <span style="color:#888;margin:0 6px">·</span>
+        <span style="color:#ddd">${a.field}: ${a.date}</span>
+        <span style="color:#888;margin-left:6px;font-size:12px">→ kaydı aç</span>
+      </div>
+      <span style="background:${a.diff===0?'#ef4444':'#f59e0b'};color:#000;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:600;flex-shrink:0">
+        ${a.diff===0?'BUGÜN':a.diff+' gün'}
+      </span>
+    </div>`).join('');
+}
+
+function renderStudies(){
+  const el=document.getElementById('studies-list');
+  if(!studies.length){el.innerHTML='<div class="empty-state">Henüz çalışma yok.<br>Yeni çalışma ekleyerek başlayın.</div>';return;}
+  el.innerHTML=studies.map(s=>`
+    <div class="study-item" onclick="openStudy('${s.id}')">
+      <div>
+        <div class="study-name">${s.name} ${s.role==='member'?'<span style="font-size:11px;background:rgba(29,185,84,.15);color:#1db954;padding:2px 8px;border-radius:100px;font-weight:500;margin-left:6px">Üye</span>':''}</div>
+        <div class="study-meta">${s.desc||'Açıklama yok'} · ${s.fieldCount||0} alan · ${s.recordCount||0} kayıt</div>
+      </div>
+      <div class="study-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openStudy('${s.id}')">Aç</button>
+        ${s.role==='owner'?`<button class="btn btn-danger btn-sm" onclick="deleteStudy('${s.id}','${s.name}')">Sil</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+window.showNewStudyModal=function(){document.getElementById('modal-new-study').style.display='flex';};
+window.closeModal=function(){document.getElementById('modal-new-study').style.display='none';};
+
+window.createStudy=async function(){
+  const name=document.getElementById('new-study-name').value.trim();
+  const desc=document.getElementById('new-study-desc').value.trim();
+  const centersRaw=document.getElementById('new-study-centers').value.trim();
+  const centers=centersRaw?centersRaw.split(',').map(c=>c.trim()).filter(Boolean):[];
+  if(!name){showMsg('Çalışma adı giriniz.','error');return;}
+  try{
+    await addDoc(collection(db,'studies'),{name,desc,centers,uid:currentUser.uid,fields:[],fieldCount:0,recordCount:0,createdAt:serverTimestamp(),memberCenters:{}});
+    closeModal();
+    document.getElementById('new-study-name').value='';
+    document.getElementById('new-study-desc').value='';
+    document.getElementById('new-study-centers').value='';
+    showMsg('Çalışma oluşturuldu!','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+
+window.openStudy=function(id){
+  currentStudy=studies.find(s=>s.id===id);
+  if(!currentStudy)return;
+  fields=[...(currentStudy.fields||[])];
+  document.getElementById('study-title').textContent=currentStudy.name;
+  document.getElementById('study-desc').textContent=currentStudy.desc||'';
+  document.getElementById('entry-title').textContent=currentStudy.name+' — Yeni kayıt';
+  const isOwner=currentStudy.role==='owner';
+  document.getElementById('tab-btn-builder').style.display=isOwner?'':'none';
+  document.getElementById('tab-btn-team').style.display=isOwner?'':'none';
+  renderFields();
+  loadRecords();
+  loadMembers();
+  switchTab('data');
+  showView('study');
+};
+
+// FIELDS
+window.selectType=function(type){
+  selectedType=type;
+  document.querySelectorAll('.field-type-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('ftype-'+type).classList.add('selected');
+  document.getElementById('new-field-options').style.display=type==='dropdown'?'block':'none';
+  document.getElementById('new-field-min').style.display=type==='number'?'block':'none';
+  document.getElementById('new-field-max').style.display=type==='number'?'block':'none';
+};
+
+window.addField=function(){
+  const label=document.getElementById('new-field-label').value.trim();
+  if(!label){showMsg('Alan adı giriniz.','error');return;}
+  const options=selectedType==='dropdown'?document.getElementById('new-field-options').value.split(',').map(o=>o.trim()).filter(Boolean):[];
+  const required=document.getElementById('new-field-required').checked;
+  const min=document.getElementById('new-field-min').value;
+  const max=document.getElementById('new-field-max').value;
+  const field={id:'f_'+Date.now(),label,type:selectedType,options,required};
+  if(selectedType==='number'){
+    if(min!=='')field.min=Number(min);
+    if(max!=='')field.max=Number(max);
+  }
+  fields.push(field);
+  document.getElementById('new-field-label').value='';
+  document.getElementById('new-field-options').value='';
+  document.getElementById('new-field-required').checked=false;
+  document.getElementById('new-field-min').value='';
+  document.getElementById('new-field-max').value='';
+  renderFields();
+  showMsg('Alan eklendi. Kaydetmeyi unutmayın!','success');
+};
+
+function renderFields(){
+  const el=document.getElementById('field-list');
+  document.getElementById('field-count').textContent=fields.length+' alan';
+  if(!fields.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">Henüz alan yok. Aşağıdan ekleyin.</div>';return;}
+  const typeLabels={text:'Metin',number:'Sayı',date:'Tarih',checkbox:'Checkbox',dropdown:'Dropdown'};
+  el.innerHTML=fields.map((f,i)=>{
+    const condStr=f.condition?`<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px">⚡ Koşullu</span>`:'';
+    const reqStr=f.required?`<span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:4px">* Zorunlu</span>`:'';
+    const condDesc=f.condition?`<div style="font-size:11px;color:#f59e0b;margin-top:3px">Göster: "${fields.find(x=>x.id===f.condition.fieldId)?.label||'?'}" ${f.condition.op==='eq'?'=':'≠'} "${f.condition.value}"</div>`:'';
+    const valDesc=(f.type==='number'&&(f.min!==undefined||f.max!==undefined))?`<div style="font-size:11px;color:#888;margin-top:2px">Aralık: ${f.min!==undefined?f.min:'∞'} — ${f.max!==undefined?f.max:'∞'}</div>`:'';
+    return `<div class="field-item">
+      <span class="field-drag">⠿</span>
+      <div class="field-info">
+        <div class="field-label">${f.label}${condStr}${reqStr}</div>
+        <div class="field-type">${typeLabels[f.type]||f.type}${f.options&&f.options.length?' · '+f.options.join(', '):''}</div>
+        ${condDesc}${valDesc}
+      </div>
+      <div class="field-actions">
+        <button class="btn btn-secondary btn-sm" onclick="showConditionModal(${i})" title="Koşul ekle">⚡</button>
+        <button class="btn btn-danger btn-sm" onclick="removeField(${i})">Sil</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.removeField=function(i){fields.splice(i,1);renderFields();};
+
+window.saveFields=async function(){
+  if(!currentStudy)return;
+  const btn=document.getElementById('save-fields-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Kaydediliyor...';
+  try{
+    await updateDoc(doc(db,'studies',currentStudy.id),{fields,fieldCount:fields.length});
+    currentStudy.fields=fields;currentStudy.fieldCount=fields.length;
+    showMsg('Form kaydedildi!','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+  finally{btn.disabled=false;btn.innerHTML='Formu kaydet';}
+};
+
+// RECORDS
+let activeCenter='all';
+
+function loadRecords(){
+  const memberCenters=currentStudy?.memberCenters||{};
+  const userCenter=memberCenters[currentUser?.email]||'';
+  // Üye ise sadece kendi merkezi
+  let q;
+  if(currentStudy?.role==='member'&&userCenter){
+    q=query(collection(db,'records'),where('studyId','==',currentStudy.id),where('_center','==',userCenter),orderBy('createdAt','desc'));
+  } else {
+    q=query(collection(db,'records'),where('studyId','==',currentStudy.id),orderBy('createdAt','desc'));
+  }
+  onSnapshot(q,snap=>{
+    records=snap.docs.map(d=>({...d.data(),id:d.id}));
+    updateRecordCount();
+    renderCenterFilter();
+    renderData();
+  });
+}
+
+function renderCenterFilter(){
+  const centers=currentStudy?.centers||[];
+  const wrap=document.getElementById('center-filter-wrap');
+  if(!centers.length||currentStudy?.role!=='owner'){wrap.style.display='none';return;}
+  wrap.style.display='flex';
+  const btns=document.getElementById('center-filter-btns');
+  const all=['all',...centers];
+  btns.innerHTML=all.map(c=>`
+    <button onclick="setCenter('${c}')" style="padding:5px 14px;font-size:12px;border-radius:100px;cursor:pointer;border:1px solid ${activeCenter===c?'#1db954':'#333'};background:${activeCenter===c?'rgba(29,185,84,.15)':'transparent'};color:${activeCenter===c?'#1db954':'#888'};font-family:inherit">
+      ${c==='all'?'Tümü':c}${c!=='all'?' ('+records.filter(r=>r._center===c).length+')':' ('+records.length+')'}
+    </button>`).join('');
+}
+
+window.setCenter=function(c){activeCenter=c;renderCenterFilter();renderData();};
+
+function updateRecordCount(){
+  if(currentStudy)updateDoc(doc(db,'studies',currentStudy.id),{recordCount:records.length}).catch(()=>{});
+}
+
+function renderData(){
+  const el=document.getElementById('data-container');
+  if(!fields.length){el.innerHTML='<div class="empty-state">Önce form alanlarını tanımlayın.<br>"Form Düzenle" sekmesine gidin.</div>';return;}
+  const centers=currentStudy?.centers||[];
+  const filtered=activeCenter==='all'?records:records.filter(r=>r._center===activeCenter);
+  if(!filtered.length){el.innerHTML='<div class="empty-state">Henüz kayıt yok.<br>"+ Veri gir" ile ilk kaydı ekleyin.</div>';return;}
+  const showCenter=centers.length&&currentStudy?.role==='owner';
+  el.innerHTML=`<div class="tbl-wrap"><table class="data-table">
+    <thead><tr><th>#</th>${showCenter?'<th>Merkez</th>':''}${fields.map(f=>`<th>${f.label}</th>`).join('')}<th>Tarih</th><th></th></tr></thead>
+    <tbody>${filtered.map((r,i)=>`<tr>
+      <td style="color:#b3b3b3">${i+1}</td>
+      ${showCenter?`<td><span style="background:rgba(29,185,84,.1);color:#1db954;font-size:12px;padding:2px 8px;border-radius:10px">${r._center||'—'}</span></td>`:''}
+      ${fields.map(f=>`<td>${formatCell(r[f.id],f)}</td>`).join('')}
+      <td style="color:#b3b3b3;font-size:12px">${r.createdAt?.toDate?r.createdAt.toDate().toLocaleDateString('tr-TR'):'-'}</td>
+      <td style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" onclick="editRecord('${r.id}')">Düzenle</button><button class="btn btn-secondary btn-sm" onclick="showHistory('${r.id}')" title="Değişiklik geçmişi">📋</button><button class="btn btn-danger btn-sm" onclick="deleteRecord('${r.id}')">Sil</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function formatCell(val,field){
+  if(val===undefined||val===null||val==='')return '<span style="color:#ccc">—</span>';
+  if(field.type==='checkbox')return val?'✓':'✗';
+  return String(val);
+}
+
+// ENTRY FORM
+window.showView=function(v){
+  ['studies','study','entry','patient'].forEach(x=>document.getElementById('view-'+x).style.display='none');
+  document.getElementById('view-'+v).style.display='block';
+  if(v==='entry'){buildEntryForm();editingRecordId=null;currentPatientId=null;}
+};
+
+function buildEntryForm(record=null){
+  const el=document.getElementById('entry-form');
+  if(!fields.length){el.innerHTML='<div style="color:#aaa;text-align:center;padding:20px">Form alanı tanımlanmamış. Önce "Form Düzenle" bölümünden alan ekleyin.</div>';return;}
+  el.innerHTML=fields.map(f=>{
+    const val=record?record[f.id]:'';
+    let input='';
+    const reqMark=f.required?`<span style="color:#ef4444;margin-left:3px">*</span>`:'';
+    if(f.type==='text')input=`<input type="text" id="ef_${f.id}" value="${val||''}" oninput="evalConditions()">`;
+    else if(f.type==='number')input=`<input type="number" id="ef_${f.id}" value="${val||''}" step="any" ${f.min!==undefined?'min='+f.min:''} ${f.max!==undefined?'max='+f.max:''} oninput="evalConditions()">`;
+    else if(f.type==='date')input=`<input type="date" id="ef_${f.id}" value="${val||''}" onchange="evalConditions()">`;
+    else if(f.type==='checkbox')input=`<div class="checkbox-row"><input type="checkbox" id="ef_${f.id}" ${val?'checked':''} onchange="evalConditions()"><span style="font-size:13px">Evet</span></div>`;
+    else if(f.type==='dropdown')input=`<select id="ef_${f.id}" onchange="evalConditions()"><option value="">Seç...</option>${(f.options||[]).map(o=>`<option value="${o}" ${val===o?'selected':''}>${o}</option>`).join('')}</select>`;
+    return `<div class="entry-field" id="ef_wrap_${f.id}">${f.label?`<label>${f.label}${reqMark}</label>`:''}${input}</div>`;
+  }).join('');
+  evalConditions();
+}
+
+window.evalConditions=function(){
+  fields.forEach(f=>{
+    const wrap=document.getElementById('ef_wrap_'+f.id);
+    if(!wrap)return;
+    if(!f.condition){wrap.style.display='';return;}
+    const {fieldId,op,value}=f.condition;
+    const srcEl=document.getElementById('ef_'+fieldId);
+    if(!srcEl){wrap.style.display='';return;}
+    let srcVal=srcEl.type==='checkbox'?(srcEl.checked?'true':'false'):srcEl.value;
+    const match=op==='eq'?srcVal===value:srcVal!==value;
+    wrap.style.display=match?'':'none';
+    if(!match){
+      // Gizlenen alanı temizle
+      if(srcEl.type==='checkbox')srcEl.checked=false;
+      else if(wrap.querySelector('input,select')){const inp=wrap.querySelector('input,select');if(inp.type!=='checkbox')inp.value='';}
+    }
+  });
+}
+
+window.deleteRecord=async function(id){
+  if(!confirm('Bu kaydı silmek istediğinizden emin misiniz?'))return;
+  try{
+    await addDoc(collection(db,'audit'),{
+      recordId:id,studyId:currentStudy.id,
+      user:currentUser.email,userName:currentUser.displayName||currentUser.email,
+      action:'delete',changes:[],timestamp:serverTimestamp()
+    });
+    await deleteDoc(doc(db,'records',id));
+    showMsg('Kayıt silindi.','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+window.editRecord=function(id){
+  const record=records.find(r=>r.id===id);if(!record)return;
+  editingRecordId=id;
+  showView('entry');
+  buildEntryForm(record);
+  document.getElementById('entry-title').textContent=currentStudy.name+' — Kaydı düzenle';
+};
+
+window._ep=function(recordId,studyId){
+  const openRecord=()=>{
+    const record=records.find(r=>r.id===recordId);
+    if(record){editingRecordId=recordId;buildEntryForm(record);document.getElementById('entry-title').textContent=(currentStudy?.name||'')+' — Kaydı düzenle';showView('entry');}
+    else setTimeout(openRecord,300);
+  };
+  if(studyId&&(!currentStudy||currentStudy.id!==studyId)){
+    const s=studies.find(x=>x.id===studyId);
+    if(s){
+      currentStudy=s;fields=[...(s.fields||[])];
+      document.getElementById('study-title').textContent=s.name;
+      document.getElementById('study-desc').textContent=s.desc||'';
+      const isOwner=s.role==='owner';
+      document.getElementById('tab-btn-builder').style.display=isOwner?'':'none';
+      document.getElementById('tab-btn-team').style.display=isOwner?'':'none';
+      renderFields();loadRecords();loadMembers();
+      showView('study');switchTab('data');
+      setTimeout(openRecord,600);
+    }
+  } else {
+    openRecord();
+  }
+};
+
+window.saveEntry=async function(){
+  const btn=document.getElementById('save-entry-btn');
+  const data={studyId:currentStudy.id,uid:currentUser.uid};
+  // Kullanıcının merkezi varsa ekle
+  const memberCenters=currentStudy.memberCenters||{};
+  const userCenter=memberCenters[currentUser.email]||'';
+  if(userCenter)data._center=userCenter;
+  // Hasta ziyareti ise patientId ekle
+  if(currentPatientId)data._patientId=currentPatientId;
+  fields.forEach(f=>{
+    const el=document.getElementById('ef_'+f.id);
+    if(!el)return;
+    if(f.type==='checkbox')data[f.id]=el.checked;
+    else data[f.id]=el.value;
+  });
+
+  // Doğrulama
+  const errors=[];
+  fields.forEach(f=>{
+    const wrap=document.getElementById('ef_wrap_'+f.id);
+    if(wrap&&wrap.style.display==='none')return; // gizli alanları atla
+    const el=document.getElementById('ef_'+f.id);
+    if(!el)return;
+    const val=f.type==='checkbox'?el.checked:el.value;
+    // Zorunlu alan kontrolü
+    if(f.required&&(val===''||val===false||val===null||val===undefined)){
+      errors.push(`"${f.label}" alanı zorunludur.`);
+      el.style.borderColor='#ef4444';
+    } else {
+      if(el.style)el.style.borderColor='';
+    }
+    // Min/max kontrolü
+    if(f.type==='number'&&val!==''){
+      const num=Number(val);
+      if(f.min!==undefined&&num<f.min)errors.push(`"${f.label}" en az ${f.min} olmalıdır.`);
+      if(f.max!==undefined&&num>f.max)errors.push(`"${f.label}" en fazla ${f.max} olabilir.`);
+    }
+  });
+  if(errors.length){
+    showMsg(errors[0],'error');
+    return;
+  }
+
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Kaydediliyor...';
+  try{
+    if(editingRecordId){
+      // Audit trail: eski veriyi al, farkı hesapla
+      const oldRecord=records.find(r=>r.id===editingRecordId)||{};
+      const changes=[];
+      fields.forEach(f=>{
+        const oldVal=oldRecord[f.id]===undefined?'':String(oldRecord[f.id]);
+        const newVal=data[f.id]===undefined?'':String(data[f.id]);
+        if(oldVal!==newVal)changes.push({field:f.label,old:oldVal,new:newVal});
+      });
+      await updateDoc(doc(db,'records',editingRecordId),data);
+      if(changes.length){
+        await addDoc(collection(db,'audit'),{
+          recordId:editingRecordId,studyId:currentStudy.id,
+          user:currentUser.email,userName:currentUser.displayName||currentUser.email,
+          action:'update',changes,timestamp:serverTimestamp()
+        });
+      }
+    } else {
+      data.createdAt=serverTimestamp();
+      const ref=await addDoc(collection(db,'records'),data);
+      await addDoc(collection(db,'audit'),{
+        recordId:ref.id,studyId:currentStudy.id,
+        user:currentUser.email,userName:currentUser.displayName||currentUser.email,
+        action:'create',changes:[],timestamp:serverTimestamp()
+      });
+    }
+    showMsg('Kaydedildi!','success');
+    editingRecordId=null;
+    if(currentPatientId){
+      // Hasta ziyaret sayısını güncelle
+      const patientRef=doc(db,'patients',currentPatientId);
+      const today=new Date().toLocaleDateString('tr-TR');
+      getDocs(query(collection(db,'records'),where('_patientId','==',currentPatientId))).then(snap=>{
+        updateDoc(patientRef,{visitCount:snap.size,lastVisit:today}).catch(()=>{});
+      });
+      openPatient(currentPatientId);
+    } else {
+      showView('study');
+      switchTab('data');
+    }
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+  finally{btn.disabled=false;btn.innerHTML='💾 Kaydı kaydet';}
+};
+
+// TABS
+window.switchTab=function(tab){
+  ['data','builder','team','stats','patients'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach(b=>{
+    b.classList.remove('active');
+    const key=b.getAttribute('data-i18n');
+    if((tab==='data'&&key==='tabData')||(tab==='builder'&&key==='tabBuilder')||(tab==='team'&&key==='tabTeam')||(tab==='stats'&&key==='tabStats')||(tab==='patients'&&key==='tabPatients'))b.classList.add('active');
+  });
+  if(tab==='stats')renderStats();
+  if(tab==='patients')loadPatients();
+};
+
+function renderStats(){
+  if(!records.length){
+    document.getElementById('stats-summary').innerHTML='';
+    document.getElementById('stats-charts').innerHTML='<div style="color:#666;font-size:14px;padding:20px">Henüz veri yok.</div>';
+    return;
+  }
+  // Summary cards
+  document.getElementById('stats-summary').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Toplam kayıt</div><div class="stat-val" style="font-size:28px;font-weight:700;color:#1db954">${records.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Alan sayısı</div><div class="stat-val" style="font-size:28px;font-weight:700">${fields.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Son kayıt</div><div class="stat-val" style="font-size:14px;font-weight:500;margin-top:4px">${records[0]?.createdAt?.toDate?records[0].createdAt.toDate().toLocaleDateString('tr-TR'):'-'}</div></div>
+  `;
+  // Charts per field
+  const chartsEl=document.getElementById('stats-charts');
+  // Destroy old charts
+  if(window._chartInstances){window._chartInstances.forEach(c=>{try{c.destroy();}catch(e){}});}
+  window._chartInstances=[];
+  chartsEl.innerHTML='';
+  fields.forEach(f=>{
+    const vals=records.map(r=>r[f.id]).filter(v=>v!==undefined&&v!==null&&v!=='');
+    if(!vals.length)return;
+    const wrap=document.createElement('div');
+    wrap.style.cssText='background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:20px';
+    if(f.type==='number'){
+      const nums=vals.map(Number).filter(n=>!isNaN(n));
+      if(!nums.length)return;
+      const avg=(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1);
+      const mn=Math.min(...nums);const mx=Math.max(...nums);
+      // Histogram
+      const buckets=5;const range=mx-mn||1;const step=range/buckets;
+      const labels=[];const counts=Array(buckets).fill(0);
+      for(let i=0;i<buckets;i++)labels.push((mn+i*step).toFixed(1)+'-'+(mn+(i+1)*step).toFixed(1));
+      nums.forEach(n=>{let b=Math.min(Math.floor((n-mn)/step),buckets-1);counts[b]++;});
+      wrap.innerHTML=`<div style="font-size:13px;font-weight:600;color:#b3b3b3;margin-bottom:4px">${f.label}</div>
+        <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:#666">
+          <span>Ort: <b style="color:#1db954">${avg}</b></span>
+          <span>Min: <b style="color:#fff">${mn}</b></span>
+          <span>Max: <b style="color:#fff">${mx}</b></span>
+          <span>n: <b style="color:#fff">${nums.length}</b></span>
+        </div>
+        <canvas id="chart_${f.id}" height="160"></canvas>`;
+      chartsEl.appendChild(wrap);
+      const ctx=document.getElementById('chart_'+f.id).getContext('2d');
+      const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:counts,backgroundColor:'rgba(29,185,84,.7)',borderColor:'#1db954',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#666',font:{size:10}},grid:{color:'#2a2a2a'}},y:{ticks:{color:'#666',font:{size:10},stepSize:1},grid:{color:'#2a2a2a'}}}}});
+      window._chartInstances.push(ch);
+    } else if(f.type==='dropdown'||f.type==='checkbox'){
+      const counts={};
+      vals.forEach(v=>{const k=v===true?'Evet':v===false?'Hayır':String(v);counts[k]=(counts[k]||0)+1;});
+      const labels=Object.keys(counts);const data=Object.values(counts);
+      const colors=['rgba(29,185,84,.8)','rgba(29,185,84,.5)','rgba(29,185,84,.3)','rgba(100,200,120,.7)','rgba(150,220,100,.6)'];
+      wrap.innerHTML=`<div style="font-size:13px;font-weight:600;color:#b3b3b3;margin-bottom:12px">${f.label} <span style="color:#666;font-size:11px">(n=${vals.length})</span></div>
+        <canvas id="chart_${f.id}" height="180"></canvas>`;
+      chartsEl.appendChild(wrap);
+      const ctx=document.getElementById('chart_'+f.id).getContext('2d');
+      const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors.slice(0,labels.length),borderColor:'#1e1e1e',borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#b3b3b3',font:{size:11},padding:12}}}}});
+      window._chartInstances.push(ch);
+    } else if(f.type==='text'){
+      // Frequency of unique values (if few unique)
+      const counts={};vals.forEach(v=>{counts[v]=(counts[v]||0)+1;});
+      const unique=Object.keys(counts);
+      if(unique.length>20)return; // too many unique values, skip
+      const sorted=unique.sort((a,b)=>counts[b]-counts[a]).slice(0,10);
+      wrap.innerHTML=`<div style="font-size:13px;font-weight:600;color:#b3b3b3;margin-bottom:12px">${f.label} <span style="color:#666;font-size:11px">(en sık)</span></div>
+        <canvas id="chart_${f.id}" height="160"></canvas>`;
+      chartsEl.appendChild(wrap);
+      const ctx=document.getElementById('chart_'+f.id).getContext('2d');
+      const ch=new Chart(ctx,{type:'bar',data:{labels:sorted,datasets:[{data:sorted.map(k=>counts[k]),backgroundColor:'rgba(29,185,84,.7)',borderColor:'#1db954',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#666',font:{size:10},stepSize:1},grid:{color:'#2a2a2a'}},y:{ticks:{color:'#b3b3b3',font:{size:11}},grid:{display:false}}}}});
+      window._chartInstances.push(ch);
+    }
+  });
+  if(!chartsEl.children.length)chartsEl.innerHTML='<div style="color:#666;font-size:14px;padding:20px">Grafik oluşturmak için sayı, dropdown veya checkbox alanı gerekli.</div>';
+}
+
+window.switchStatTab=function(tab){
+  ['charts','crosstab','correlation'].forEach(t=>{
+    document.getElementById('stats-'+t).style.display=t===tab?(t==='charts'?'grid':'block'):'none';
+    const btn=document.getElementById('stab-'+t);
+    if(btn){
+      btn.style.borderColor=t===tab?'#1db954':'#333';
+      btn.style.background=t===tab?'rgba(29,185,84,.15)':'transparent';
+      btn.style.color=t===tab?'#1db954':'#888';
+    }
+  });
+  if(tab==='crosstab')renderCrossTab();
+  if(tab==='correlation')renderCorrelation();
+};
+
+function renderCrossTab(){
+  const el=document.getElementById('stats-crosstab');
+  const catFields=fields.filter(f=>f.type==='dropdown'||f.type==='checkbox');
+  if(catFields.length<2){
+    el.innerHTML='<div style="color:#666;font-size:14px;padding:20px">Çapraz tablo için en az 2 kategori alanı (dropdown veya checkbox) gerekli.</div>';
+    return;
+  }
+  // Field selectors
+  el.innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+      <div>
+        <div style="font-size:12px;color:#666;margin-bottom:4px">Satır</div>
+        <select id="ct-row" onchange="buildCrossTab()" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
+          ${catFields.map(f=>`<option value="${f.id}">${f.label}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#666;margin-bottom:4px">Sütun</div>
+        <select id="ct-col" onchange="buildCrossTab()" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
+          ${catFields.map((f,i)=>`<option value="${f.id}" ${i===1?'selected':''}>${f.label}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="ct-table"></div>`;
+  buildCrossTab();
+}
+
+window.buildCrossTab=function(){
+  const rowId=document.getElementById('ct-row').value;
+  const colId=document.getElementById('ct-col').value;
+  if(rowId===colId){document.getElementById('ct-table').innerHTML='<div style="color:#f59e0b;font-size:13px">Farklı alanlar seçin.</div>';return;}
+  const rowF=fields.find(f=>f.id===rowId);
+  const colF=fields.find(f=>f.id===colId);
+  const rowVals=[...new Set(records.map(r=>r[rowId]===true?'Evet':r[rowId]===false?'Hayır':String(r[rowId]||'')).filter(Boolean))].sort();
+  const colVals=[...new Set(records.map(r=>r[colId]===true?'Evet':r[colId]===false?'Hayır':String(r[colId]||'')).filter(Boolean))].sort();
+  if(!rowVals.length||!colVals.length){document.getElementById('ct-table').innerHTML='<div style="color:#666;font-size:13px">Yeterli veri yok.</div>';return;}
+
+  // Build count matrix
+  const matrix={};
+  rowVals.forEach(rv=>{matrix[rv]={};colVals.forEach(cv=>{matrix[rv][cv]=0;});});
+  records.forEach(r=>{
+    const rv=r[rowId]===true?'Evet':r[rowId]===false?'Hayır':String(r[rowId]||'');
+    const cv=r[colId]===true?'Evet':r[colId]===false?'Hayır':String(r[colId]||'');
+    if(matrix[rv]&&cv)matrix[rv][cv]=(matrix[rv][cv]||0)+1;
+  });
+
+  const rowTotals={};rowVals.forEach(rv=>{rowTotals[rv]=colVals.reduce((s,cv)=>s+(matrix[rv][cv]||0),0);});
+  const colTotals={};colVals.forEach(cv=>{colTotals[cv]=rowVals.reduce((s,rv)=>s+(matrix[rv][cv]||0),0);});
+  const grand=Object.values(rowTotals).reduce((s,v)=>s+v,0);
+  const maxVal=Math.max(...rowVals.flatMap(rv=>colVals.map(cv=>matrix[rv][cv]||0)));
+
+  document.getElementById('ct-table').innerHTML=`
+    <div style="font-size:13px;font-weight:600;color:#b3b3b3;margin-bottom:12px">${rowF.label} × ${colF.label}</div>
+    <div style="overflow-x:auto">
+    <table style="border-collapse:collapse;font-size:13px;min-width:400px">
+      <thead>
+        <tr>
+          <th style="padding:10px 14px;text-align:left;color:#666;border-bottom:1px solid #333">${rowF.label} \\ ${colF.label}</th>
+          ${colVals.map(cv=>`<th style="padding:10px 14px;text-align:center;color:#b3b3b3;border-bottom:1px solid #333">${cv}</th>`).join('')}
+          <th style="padding:10px 14px;text-align:center;color:#1db954;border-bottom:1px solid #333">Toplam</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowVals.map(rv=>`<tr>
+          <td style="padding:10px 14px;color:#b3b3b3;border-bottom:1px solid #1e1e1e;font-weight:500">${rv}</td>
+          ${colVals.map(cv=>{
+            const n=matrix[rv][cv]||0;
+            const pct=rowTotals[rv]>0?Math.round(n/rowTotals[rv]*100):0;
+            const intensity=maxVal>0?n/maxVal:0;
+            return `<td style="padding:10px 14px;text-align:center;border-bottom:1px solid #1e1e1e;background:rgba(29,185,84,${(intensity*.3).toFixed(2)})">
+              <div style="font-weight:600;color:#fff">${n}</div>
+              <div style="font-size:11px;color:#888">${pct}%</div>
+            </td>`;
+          }).join('')}
+          <td style="padding:10px 14px;text-align:center;border-bottom:1px solid #1e1e1e;color:#1db954;font-weight:600">${rowTotals[rv]}</td>
+        </tr>`).join('')}
+        <tr style="background:#1e1e1e">
+          <td style="padding:10px 14px;color:#1db954;font-weight:600">Toplam</td>
+          ${colVals.map(cv=>`<td style="padding:10px 14px;text-align:center;color:#1db954;font-weight:600">${colTotals[cv]||0}</td>`).join('')}
+          <td style="padding:10px 14px;text-align:center;color:#1db954;font-weight:700">${grand}</td>
+        </tr>
+      </tbody>
+    </table></div>`;
+};
+
+function renderCorrelation(){
+  const el=document.getElementById('stats-correlation');
+  const numFields=fields.filter(f=>f.type==='number');
+  if(numFields.length<2){
+    el.innerHTML='<div style="color:#666;font-size:14px;padding:20px">Korelasyon matrisi için en az 2 sayı alanı gerekli.</div>';
+    return;
+  }
+
+  // Pearson correlation
+  function pearson(x,y){
+    const n=x.length;if(n<2)return 0;
+    const mx=x.reduce((s,v)=>s+v,0)/n;
+    const my=y.reduce((s,v)=>s+v,0)/n;
+    const num=x.reduce((s,v,i)=>s+(v-mx)*(y[i]-my),0);
+    const dx=Math.sqrt(x.reduce((s,v)=>s+(v-mx)**2,0));
+    const dy=Math.sqrt(y.reduce((s,v)=>s+(v-my)**2,0));
+    return dx&&dy?num/(dx*dy):0;
+  }
+
+  // Get valid pairs
+  const matrix=numFields.map(f1=>numFields.map(f2=>{
+    const pairs=records.map(r=>({a:Number(r[f1.id]),b:Number(r[f2.id])})).filter(p=>!isNaN(p.a)&&!isNaN(p.b)&&r=>r);
+    const valid=records.filter(r=>r[f1.id]!==''&&r[f2.id]!==''&&!isNaN(Number(r[f1.id]))&&!isNaN(Number(r[f2.id])));
+    if(valid.length<2)return null;
+    const xs=valid.map(r=>Number(r[f1.id]));
+    const ys=valid.map(r=>Number(r[f2.id]));
+    return pearson(xs,ys);
+  }));
+
+  const getColor=(r)=>{
+    if(r===null)return '#1e1e1e';
+    if(r===1)return 'rgba(29,185,84,.8)';
+    if(r>0.7)return `rgba(29,185,84,${(r*.7).toFixed(2)})`;
+    if(r>0)return `rgba(29,185,84,${(r*.4).toFixed(2)})`;
+    if(r>-0.7)return `rgba(239,68,68,${(Math.abs(r)*.4).toFixed(2)})`;
+    return `rgba(239,68,68,${(Math.abs(r)*.7).toFixed(2)})`;
+  };
+
+  el.innerHTML=`
+    <div style="font-size:13px;font-weight:600;color:#b3b3b3;margin-bottom:12px">Pearson Korelasyon Matrisi</div>
+    <div style="font-size:12px;color:#666;margin-bottom:16px">🟢 Pozitif korelasyon · 🔴 Negatif korelasyon · Değerler: -1 ile +1 arasında</div>
+    <div style="overflow-x:auto">
+    <table style="border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr>
+          <th style="padding:10px 14px;min-width:120px"></th>
+          ${numFields.map(f=>`<th style="padding:10px 14px;text-align:center;color:#b3b3b3;min-width:100px;max-width:120px;word-break:break-word">${f.label}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${numFields.map((f1,i)=>`<tr>
+          <td style="padding:10px 14px;color:#b3b3b3;font-weight:500;white-space:nowrap">${f1.label}</td>
+          ${numFields.map((f2,j)=>{
+            const r=matrix[i][j];
+            const disp=r===null?'—':r===1?'1.00':r.toFixed(2);
+            return `<td style="padding:10px 14px;text-align:center;background:${getColor(r)};border:1px solid #1a1a1a;border-radius:4px">
+              <div style="font-weight:600;color:#fff;font-size:13px">${disp}</div>
+            </td>`;
+          }).join('')}
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+    <div style="margin-top:16px;font-size:12px;color:#666">n = ${records.length} kayıt · Eksik değerler çift bazında çıkarıldı</div>`;
+}
+
+
+function loadMembers(){
+  if(!currentStudy||currentStudy.role!=='owner')return;
+  const members=currentStudy.members||[];
+  const memberCenters=currentStudy.memberCenters||{};
+  const centers=currentStudy.centers||[];
+  document.getElementById('member-count').textContent=members.length+' üye';
+
+  // Merkez dropdown güncelle
+  const centerSel=document.getElementById('invite-center');
+  centerSel.innerHTML='<option value="">Tüm merkezler</option>'+centers.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('centers-card').style.display=centers.length?'':'none';
+
+  // Merkez listesi
+  if(centers.length){
+    document.getElementById('centers-list').innerHTML=centers.map(c=>{
+      const memberCount=members.filter(m=>memberCenters[m]===c).length;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a2a2a">
+        <div><div style="font-size:14px;font-weight:500">${c}</div><div style="font-size:12px;color:#666">${memberCount} üye</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const el=document.getElementById('member-list');
+  if(!members.length){el.innerHTML='<div style="color:#666;font-size:13px;padding:12px 0">Henüz ekip üyesi yok.</div>';return;}
+  el.innerHTML=members.map(email=>{
+    const center=memberCenters[email]||'';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a2a2a">
+      <div>
+        <div style="font-size:14px">${email}</div>
+        ${center?`<div style="font-size:12px;color:#1db954;margin-top:2px">📍 ${center}</div>`:'<div style="font-size:12px;color:#666;margin-top:2px">Tüm merkezler</div>'}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeMember('${email}')">Çıkar</button>
+    </div>`;
+  }).join('');
+}
+
+window.inviteMember=async function(){
+  const email=document.getElementById('invite-email').value.trim().toLowerCase();
+  const center=document.getElementById('invite-center').value;
+  if(!email||!email.includes('@')){showMsg('Geçerli bir e-posta giriniz.','error');return;}
+  if(email===currentUser.email){showMsg('Kendinizi ekleyemezsiniz.','error');return;}
+  const members=currentStudy.members||[];
+  if(members.includes(email)){showMsg('Bu kişi zaten ekipte.','error');return;}
+  try{
+    const updated=[...members,email];
+    const memberCenters={...(currentStudy.memberCenters||{})};
+    if(center)memberCenters[email]=center;
+    await updateDoc(doc(db,'studies',currentStudy.id),{members:updated,memberCenters});
+    currentStudy.members=updated;currentStudy.memberCenters=memberCenters;
+    document.getElementById('invite-email').value='';
+    document.getElementById('invite-center').value='';
+    loadMembers();
+    const emailParams={to_email:email,from_name:currentUser.displayName||currentUser.email,study_name:currentStudy.name};
+    emailjs.send('service_gzpzend','template_vz63pjk',emailParams).catch(()=>{});
+    showMsg(email+' ekibe eklendi'+(center?' ('+center+')':'')+'!','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+
+window.removeMember=async function(email){
+  if(!confirm(email+' kişisini ekipten çıkarmak istiyor musunuz?'))return;
+  try{
+    const updated=(currentStudy.members||[]).filter(m=>m!==email);
+    const memberCenters={...(currentStudy.memberCenters||{})};
+    delete memberCenters[email];
+    await updateDoc(doc(db,'studies',currentStudy.id),{members:updated,memberCenters});
+    currentStudy.members=updated;currentStudy.memberCenters=memberCenters;
+    loadMembers();
+    showMsg('Ekipten çıkarıldı.','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+
+// EXPORT
+window.deleteStudy=async function(id,name){
+  if(!confirm(`"${name}" çalışmasını silmek istediğinizden emin misiniz?\nİçindeki tüm veriler de silinecek!`))return;
+  try{
+    const rq=query(collection(db,'records'),where('studyId','==',id));
+    const rsnap=await getDocs(rq);
+    const dels=rsnap.docs.map(d=>deleteDoc(doc(db,'records',d.id)));
+    await Promise.all(dels);
+    await deleteDoc(doc(db,'studies',id));
+    showMsg('Çalışma silindi.','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+window.exportXLSX=function(){
+  if(!records.length){showMsg('Dışa aktarılacak veri yok.','error');return;}
+  const header=['#',...fields.map(f=>f.label),'Kayıt tarihi'];
+  const rows=records.map((r,i)=>[
+    i+1,
+    ...fields.map(f=>{const v=r[f.id];if(typeof v==='boolean')return v?1:0;return v||'';}),
+    r.createdAt?.toDate?r.createdAt.toDate().toLocaleDateString('tr-TR'):''
+  ]);
+  const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
+  ws['!cols']=[{wch:5},...fields.map(()=>({wch:20})),{wch:15}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,currentStudy.name.slice(0,31));
+  XLSX.writeFile(wb,(currentStudy.name+'_'+new Date().toISOString().slice(0,10)+'.xlsx').replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ_\-\.]/g,'_'));
+};
+
+window.exportSPSS=function(){
+  if(!records.length){showMsg('Dışa aktarılacak veri yok.','error');return;}
+
+  // SPSS uyumlu değişken adları: max 64 karakter, boşluk yok, Türkçe karakter yok
+  function toSpssVar(label,idx){
+    const tr={'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c','Ğ':'G','Ü':'U','Ş':'S','İ':'I','Ö':'O','Ç':'C'};
+    let v=label.replace(/[ğüşıöçĞÜŞİÖÇ]/g,c=>tr[c]||c).replace(/[^a-zA-Z0-9_]/g,'_').replace(/^[0-9]/,'v$&').slice(0,64);
+    return v||'var'+idx;
+  }
+
+  const spssVars=fields.map((f,i)=>toSpssVar(f.label,i));
+
+  // Sayfa 1: Veri (SPSS için sayısal değerler)
+  const dataHeader=['ID',...spssVars,'tarih'];
+  const dataRows=records.map((r,i)=>[
+    i+1,
+    ...fields.map(f=>{
+      const v=r[f.id];
+      if(typeof v==='boolean')return v?1:0;
+      if(f.type==='number')return v===''||v===undefined?'':Number(v);
+      if(f.type==='dropdown'&&f.options){
+        // Kategorik → sayısal kod
+        const idx=f.options.indexOf(v);
+        return idx>=0?idx+1:'';
+      }
+      return v||'';
+    }),
+    r.createdAt?.toDate?r.createdAt.toDate().toLocaleDateString('tr-TR'):''
+  ]);
+
+  // Sayfa 2: Değişken bilgileri (değer etiketleri)
+  const metaRows=[['Değişken adı','Orijinal etiket','Tip','Değer etiketleri']];
+  fields.forEach((f,i)=>{
+    let valueLabels='';
+    if(f.type==='dropdown'&&f.options){
+      valueLabels=f.options.map((o,j)=>`${j+1}=${o}`).join('; ');
+    } else if(f.type==='checkbox'){
+      valueLabels='0=Hayır; 1=Evet';
+    }
+    metaRows.push([spssVars[i],f.label,f.type,valueLabels]);
+  });
+
+  const wb=XLSX.utils.book_new();
+  const wsData=XLSX.utils.aoa_to_sheet([dataHeader,...dataRows]);
+  wsData['!cols']=[{wch:6},...fields.map(()=>({wch:18})),{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsData,'Veri');
+
+  const wsMeta=XLSX.utils.aoa_to_sheet(metaRows);
+  wsMeta['!cols']=[{wch:20},{wch:25},{wch:12},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,wsMeta,'Degisken_Bilgileri');
+
+  XLSX.writeFile(wb,(currentStudy.name+'_SPSS_'+new Date().toISOString().slice(0,10)+'.xlsx').replace(/[^a-zA-Z0-9_\-\.]/g,'_'));
+  showMsg('SPSS dosyası hazır! "Değişken_Bilgileri" sayfasındaki etiketleri SPSS\'e tanımlayın.','success');
+};
+
+window.showQR=function(){
+  if(!currentStudy)return;
+  const url=`${location.origin}${location.pathname}?study=${currentStudy.id}&action=entry`;
+  document.getElementById('qr-link').textContent=url;
+  const container=document.getElementById('qr-container');
+  container.innerHTML='';
+  new QRCode(container,{text:url,width:220,height:220,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+  document.getElementById('modal-qr').style.display='flex';
+};
+
+window.downloadQR=function(){
+  const canvas=document.querySelector('#qr-container canvas');
+  if(!canvas){showMsg('QR oluşturulamadı.','error');return;}
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download='Datify_QR_'+(currentStudy?.name||'form').replace(/\s/g,'_')+'.png';
+  a.click();
+};
+
+window.copyQRLink=function(){
+  const link=document.getElementById('qr-link').textContent;
+  navigator.clipboard.writeText(link).then(()=>showMsg('Link kopyalandı!','success')).catch(()=>showMsg('Kopyalanamadı.','error'));
+};
+
+// QR ile gelen kullanıcıyı yönlendir
+function handleQRRedirect(){
+  const params=new URLSearchParams(location.search);
+  const studyId=params.get('study');
+  const action=params.get('action');
+  if(!studyId||action!=='entry')return;
+  // Kullanıcı giriş yaptıktan sonra yönlendir
+  window._qrStudyId=studyId;
+}
+handleQRRedirect();
+
+window.showHistory=async function(recordId){
+  const el=document.getElementById('history-content');
+  el.innerHTML='<div style="color:#666;font-size:13px;padding:12px">Yükleniyor...</div>';
+  document.getElementById('modal-history').style.display='flex';
+  try{
+    const q=query(collection(db,'audit'),where('recordId','==',recordId),orderBy('timestamp','desc'));
+    const snap=await getDocs(q);
+    if(!snap.docs.length){el.innerHTML='<div style="color:#666;font-size:13px;padding:12px">Henüz değişiklik yok.</div>';return;}
+    const actionLabels={create:'Oluşturuldu',update:'Güncellendi',delete:'Silindi'};
+    const actionColors={create:'#1db954',update:'#f59e0b',delete:'#ef4444'};
+    el.innerHTML=snap.docs.map(d=>{
+      const a=d.data();
+      const ts=a.timestamp?.toDate?a.timestamp.toDate().toLocaleString('tr-TR'):'-';
+      const color=actionColors[a.action]||'#888';
+      const label=actionLabels[a.action]||a.action;
+      return `<div style="border-left:3px solid ${color};padding:10px 14px;margin-bottom:10px;background:#1e1e1e;border-radius:0 8px 8px 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:600;color:${color}">${label}</span>
+          <span style="font-size:11px;color:#666">${ts}</span>
+        </div>
+        <div style="font-size:12px;color:#888">${a.userName||a.user}</div>
+        ${a.changes&&a.changes.length?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+          ${a.changes.map(c=>`<div style="font-size:12px;background:#2a2a2a;border-radius:6px;padding:5px 8px">
+            <span style="color:#b3b3b3">${c.field}:</span>
+            <span style="color:#ef4444;text-decoration:line-through;margin:0 6px">${c.old||'(boş)'}</span>
+            <span style="color:#666">→</span>
+            <span style="color:#1db954;margin-left:6px">${c.new||'(boş)'}</span>
+          </div>`).join('')}
+        </div>`:''}
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div style="color:#ef4444;font-size:13px">Hata: '+e.message+'</div>';}
+};
+
+let conditionFieldIdx=null;
+
+window.showConditionModal=function(idx){
+  conditionFieldIdx=idx;
+  const f=fields[idx];
+  document.getElementById('condition-field-name').textContent='"'+f.label+'" alanı için koşul';
+  // Populate source fields (all fields except this one)
+  const sel=document.getElementById('cond-source-field');
+  sel.innerHTML='<option value="">— Alan seç —</option>'+
+    fields.filter((_,i)=>i!==idx).map(sf=>`<option value="${sf.id}" ${f.condition?.fieldId===sf.id?'selected':''}>${sf.label}</option>`).join('');
+  document.getElementById('cond-op').value=f.condition?.op||'eq';
+  document.getElementById('cond-value').value=f.condition?.value||'';
+  updateCondValueInput();
+  document.getElementById('modal-condition').style.display='flex';
+};
+
+window.updateCondValueInput=function(){
+  const fieldId=document.getElementById('cond-source-field').value;
+  const srcField=fields.find(f=>f.id===fieldId);
+  const grp=document.getElementById('cond-value-group');
+  if(!srcField){grp.innerHTML='<label>Değer</label><input id="cond-value" placeholder="Karşılaştırılacak değer" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%">';return;}
+  if(srcField.type==='checkbox'){
+    grp.innerHTML=`<label>Değer</label><select id="cond-value" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%"><option value="true">Evet (işaretli)</option><option value="false">Hayır (işaretsiz)</option></select>`;
+  } else if(srcField.type==='dropdown'&&srcField.options?.length){
+    grp.innerHTML=`<label>Değer</label><select id="cond-value" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%"><option value="">Seç...</option>${srcField.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+  } else {
+    grp.innerHTML=`<label>Değer</label><input id="cond-value" placeholder="Karşılaştırılacak değer" style="background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;width:100%">`;
+  }
+};
+
+window.saveCondition=function(){
+  const fieldId=document.getElementById('cond-source-field').value;
+  const op=document.getElementById('cond-op').value;
+  const value=document.getElementById('cond-value').value;
+  if(!fieldId){showMsg('Kaynak alan seçiniz.','error');return;}
+  if(value===''){showMsg('Değer giriniz.','error');return;}
+  fields[conditionFieldIdx].condition={fieldId,op,value};
+  renderFields();
+  closeConditionModal();
+  showMsg('Koşul eklendi! Formu kaydetmeyi unutmayın.','success');
+};
+
+window.removeCondition=function(){
+  delete fields[conditionFieldIdx].condition;
+  renderFields();
+  closeConditionModal();
+  showMsg('Koşul kaldırıldı.','success');
+};
+
+window.closeConditionModal=function(){
+  document.getElementById('modal-condition').style.display='none';
+  conditionFieldIdx=null;
+};
+
+let importData=[];
+let importColumns=[];
+
+window.handleImportFile=function(e){
+  const file=e.target.files[0];if(!file)return;
+  e.target.value='';
+  if(!fields.length){showMsg('Önce form alanlarını tanımlayın.','error');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!json.length){showMsg('Dosyada veri bulunamadı.','error');return;}
+      importColumns=Object.keys(json[0]);
+      importData=json;
+      buildImportMapping();
+      document.getElementById('modal-import').style.display='flex';
+      document.getElementById('import-preview-info').textContent=json.length+' satır bulundu. İlk satır: '+importColumns.slice(0,4).join(', ')+(importColumns.length>4?'...':'');
+    }catch(err){showMsg('Dosya okunamadı: '+err.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+function buildImportMapping(){
+  const el=document.getElementById('import-mapping');
+  el.innerHTML=fields.map(f=>{
+    // Otomatik eşleştirme: sütun adı alan adına benziyorsa seç
+    const auto=importColumns.find(c=>c.toLowerCase().includes(f.label.toLowerCase())||f.label.toLowerCase().includes(c.toLowerCase()))||'';
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="min-width:140px;font-size:13px;font-weight:500;color:#ddd">${f.label}</div>
+      <div style="font-size:13px;color:#666">←</div>
+      <select id="map_${f.id}" style="flex:1;min-width:160px;background:#1e1e1e;color:#ddd;border:1px solid #333;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
+        <option value="">— Eşleştirme yok —</option>
+        ${importColumns.map(c=>`<option value="${c}" ${c===auto?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+}
+
+window.doImport=async function(){
+  const btn=document.getElementById('import-confirm-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Yükleniyor...';
+  const mapping={};
+  fields.forEach(f=>{
+    const sel=document.getElementById('map_'+f.id);
+    if(sel&&sel.value)mapping[f.id]=sel.value;
+  });
+
+  // Eşleşmeyen sütunları bul → yeni alan olarak ekle
+  const mappedCols=new Set(Object.values(mapping));
+  const unmappedCols=importColumns.filter(c=>!mappedCols.has(c));
+  const newFields=[...fields];
+  unmappedCols.forEach(col=>{
+    const newId='f_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    newFields.push({id:newId,label:col,type:'text',options:[]});
+    mapping[newId]=col;
+  });
+
+  // Yeni alanları kaydet
+  if(unmappedCols.length){
+    try{await updateDoc(doc(db,'studies',currentStudy.id),{fields:newFields,fieldCount:newFields.length});}
+    catch(e){}
+    fields=[...newFields];currentStudy.fields=newFields;
+    renderFields();
+  }
+
+  try{
+    let count=0;
+    const batchSize=20;
+    for(let i=0;i<importData.length;i+=batchSize){
+      const batch=importData.slice(i,i+batchSize);
+      await Promise.all(batch.map(row=>{
+        const data={studyId:currentStudy.id,uid:currentUser.uid,createdAt:serverTimestamp()};
+        newFields.forEach(f=>{
+          const col=mapping[f.id];
+          if(!col)return;
+          const val=row[col];
+          if(val===undefined||val==='')return;
+          if(f.type==='checkbox')data[f.id]=val===1||val==='1'||val===true||String(val).toLowerCase()==='evet'||String(val).toLowerCase()==='yes';
+          else if(f.type==='number')data[f.id]=Number(val)||'';
+          else data[f.id]=String(val);
+        });
+        return addDoc(collection(db,'records'),data);
+      }));
+      count+=batch.length;
+    }
+    closeImportModal();
+    const msg=unmappedCols.length
+      ?`${count} kayıt yüklendi! ${unmappedCols.length} yeni alan otomatik eklendi: ${unmappedCols.join(', ')}`
+      :`${count} kayıt başarıyla yüklendi!`;
+    showMsg(msg,'success');
+  }catch(err){showMsg('Yükleme hatası: '+err.message,'error');}
+  finally{btn.disabled=false;btn.innerHTML='Yükle';}
+};
+
+window.closeImportModal=function(){
+  document.getElementById('modal-import').style.display='none';
+  importData=[];importColumns=[];
+};
+
+// PATIENT / LONGITUDINAL FUNCTIONS
+let patients_list=[];
+let currentPatientId=null;
+
+window.showNewPatientModal=function(){
+  document.getElementById('pt-name').value='';
+  document.getElementById('pt-id').value='';
+  document.getElementById('pt-dob').value='';
+  document.getElementById('pt-note').value='';
+  document.getElementById('modal-new-patient').style.display='flex';
+};
+
+window.createPatient=async function(){
+  const name=document.getElementById('pt-name').value.trim();
+  if(!name){showMsg('Ad Soyad giriniz.','error');return;}
+  const ptId=document.getElementById('pt-id').value.trim();
+  const dob=document.getElementById('pt-dob').value;
+  const note=document.getElementById('pt-note').value.trim();
+  try{
+    await addDoc(collection(db,'patients'),{
+      studyId:currentStudy.id,uid:currentUser.uid,name,ptId,dob,note,
+      visitCount:0,lastVisit:'',createdAt:serverTimestamp()
+    });
+    document.getElementById('modal-new-patient').style.display='none';
+    showMsg('Hasta eklendi!','success');
+    loadPatients();
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+
+function loadPatients(){
+  const q=query(collection(db,'patients'),where('studyId','==',currentStudy.id),orderBy('createdAt','desc'));
+  getDocs(q).then(snap=>{
+    patients_list=snap.docs.map(d=>({...d.data(),id:d.id}));
+    renderPatients();
+  }).catch(()=>{});
+}
+
+function renderPatients(){
+  const el=document.getElementById('patients-container');
+  if(!patients_list.length){el.innerHTML='<div class="empty-state">Henüz hasta kaydı yok.<br>"+ Yeni hasta" ile ekleyin.</div>';return;}
+  el.innerHTML=patients_list.map(p=>`
+    <div class="study-item" onclick="openPatient('${p.id}')">
+      <div>
+        <div class="study-name">${p.name}${p.ptId?` <span style="font-size:12px;color:#666;font-weight:400">(${p.ptId})</span>`:''}</div>
+        <div class="study-meta">${p.dob?'D: '+p.dob+' · ':''} ${p.visitCount||0} ziyaret${p.lastVisit?' · Son: '+p.lastVisit:''}</div>
+      </div>
+      <div style="display:flex;gap:8px" onclick="event.stopPropagation()">
+        <button class="btn btn-primary btn-sm" onclick="openPatient('${p.id}')">Ziyaretler</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePatient('${p.id}','${p.name}')">Sil</button>
+      </div>
+    </div>`).join('');
+}
+
+window.openPatient=function(id){
+  const p=patients_list.find(x=>x.id===id);
+  if(!p)return;
+  currentPatientId=id;
+  document.getElementById('patient-name-title').textContent=p.name;
+  document.getElementById('patient-meta').textContent=(p.ptId?'ID: '+p.ptId+' · ':'')+( p.dob?'D: '+p.dob:'');
+  loadVisits(id);
+  ['studies','study','entry'].forEach(x=>document.getElementById('view-'+x).style.display='none');
+  document.getElementById('view-patient').style.display='block';
+};
+
+function loadVisits(patientId){
+  const q=query(collection(db,'records'),where('studyId','==',currentStudy.id),where('_patientId','==',patientId),orderBy('createdAt','desc'));
+  getDocs(q).then(snap=>{
+    const visits=snap.docs.map(d=>({...d.data(),id:d.id}));
+    renderVisits(visits);
+  }).catch(()=>{});
+}
+
+function renderVisits(visits){
+  const el=document.getElementById('visits-container');
+  if(!visits.length){el.innerHTML='<div class="empty-state">Henüz ziyaret yok.<br>"+ Yeni ziyaret" ile ilk ziyareti ekleyin.</div>';return;}
+  el.innerHTML=visits.map((v,i)=>{
+    const date=v.createdAt?.toDate?v.createdAt.toDate().toLocaleDateString('tr-TR'):'-';
+    const vals=fields.slice(0,4).map(f=>`<span style="font-size:12px;color:#888">${f.label}: <b style="color:#ddd">${formatCell(v[f.id],f)}</b></span>`).join(' · ');
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <span style="font-size:14px;font-weight:600;color:#1db954">Ziyaret ${visits.length-i}</span>
+          <span style="font-size:12px;color:#666;margin-left:10px">${date}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="editVisit('${v.id}')">Düzenle</button>
+          <button class="btn btn-secondary btn-sm" onclick="showHistory('${v.id}')">📋</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord('${v.id}')">Sil</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">${vals}</div>
+    </div>`;
+  }).join('');
+}
+
+window.newVisit=function(){
+  if(!currentPatientId)return;
+  editingRecordId=null;
+  buildEntryForm();
+  document.getElementById('entry-title').textContent='Yeni ziyaret — '+(patients_list.find(p=>p.id===currentPatientId)?.name||'');
+  ['studies','study','patient'].forEach(x=>document.getElementById('view-'+x).style.display='none');
+  document.getElementById('view-entry').style.display='block';
+};
+
+window.editVisit=function(id){
+  const record=records.find(r=>r.id===id)||{id};
+  editingRecordId=id;
+  // fetch from firestore if not in records
+  getDocs(query(collection(db,'records'),where('__name__','==',id))).then(snap=>{
+    const data=snap.docs[0]?.data()||{};
+    buildEntryForm({...data,id});
+    document.getElementById('entry-title').textContent='Ziyareti düzenle';
+    ['studies','study','patient'].forEach(x=>document.getElementById('view-'+x).style.display='none');
+    document.getElementById('view-entry').style.display='block';
+  });
+};
+
+window.deletePatient=async function(id,name){
+  if(!confirm(`"${name}" hastasını silmek istediğinizden emin misiniz?\nTüm ziyaret kayıtları da silinecek!`))return;
+  try{
+    // Ziyaretleri sil
+    const q=query(collection(db,'records'),where('_patientId','==',id));
+    const snap=await getDocs(q);
+    await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'records',d.id))));
+    await deleteDoc(doc(db,'patients',id));
+    loadPatients();
+    showMsg('Hasta silindi.','success');
+  }catch(e){showMsg('Hata: '+e.message,'error');}
+};
+
+// AI FORM GENERATION
+window.generateFormWithAI=async function(){
+  const prompt=document.getElementById('ai-prompt').value.trim();
+  if(!prompt){showMsg('Lütfen çalışmanızı açıklayın.','error');return;}
+  const btn=document.getElementById('ai-gen-btn');
+  const preview=document.getElementById('ai-preview');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Oluşturuluyor...';
+  preview.style.display='none';
+  try{
+    const response=await fetch('/.netlify/functions/ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`Sen Datify AI'sın — araştırma formu tasarımı konusunda uzman bir yapay zeka asistanısın. Kullanıcının açıkladığı klinik/akademik araştırma için uygun form alanları oluşturuyorsun.
+SADECE JSON döndür, başka hiçbir şey yazma. Format:
+{"fields":[{"label":"Alan Adı","type":"text|number|date|checkbox|dropdown","options":["A","B"],"required":true|false,"min":0,"max":100}]}
+- type: text, number, date, checkbox, dropdown
+- options: sadece dropdown için
+- min/max: sadece number için
+- En fazla 15 alan oluştur
+- Türkçe alan adları kullan
+- Klinik açıdan mantıklı ve kapsamlı ol`,
+        messages:[{role:'user',content:'Bu araştırma için form alanları oluştur: '+prompt}]
+      })
+    });
+    const data=await response.json();
+    const text=data.content?.find(c=>c.type==='text')?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    if(!parsed.fields?.length)throw new Error('Geçersiz yanıt');
+
+    // Önizleme göster
+    const typeLabels={text:'Metin',number:'Sayı',date:'Tarih',checkbox:'Checkbox',dropdown:'Dropdown'};
+    preview.style.display='block';
+    preview.innerHTML=`
+      <div style="font-size:13px;font-weight:600;color:#1db954;margin-bottom:10px">✨ ${parsed.fields.length} alan oluşturuldu — beğendin mi?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+        ${parsed.fields.map(f=>`
+          <div style="background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:6px 10px;font-size:12px">
+            <span style="color:#ddd;font-weight:500">${f.label}</span>
+            <span style="color:#666;margin-left:6px">${typeLabels[f.type]||f.type}</span>
+            ${f.required?'<span style="color:#ef4444;margin-left:4px">*</span>':''}
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="applyAIForm(${JSON.stringify(parsed.fields).replace(/"/g,'&quot;')})">✓ Formu uygula</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ai-preview').style.display='none'">İptal</button>
+      </div>`;
+    window._aiFields=parsed.fields;
+  }catch(e){
+    showMsg('AI yanıtı alınamadı: '+e.message,'error');
+  }finally{
+    btn.disabled=false;btn.innerHTML='✨ Oluştur';
+  }
+};
+
+window.applyAIForm=function(fieldsJson){
+  let newFields;
+  try{newFields=typeof fieldsJson==='string'?JSON.parse(fieldsJson):fieldsJson;}
+  catch(e){newFields=window._aiFields;}
+  if(!newFields)return;
+  // ID ekle
+  newFields=newFields.map(f=>({...f,id:'f_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),options:f.options||[]}));
+  if(fields.length&&!confirm('Mevcut alanların üzerine eklensin mi? (İptal: mevcut alanlar korunur, Tamam: sadece AI alanları kullanılır)')){
+    fields=[...fields,...newFields];
+  } else {
+    fields=newFields;
+  }
+  renderFields();
+  document.getElementById('ai-preview').style.display='none';
+  document.getElementById('ai-prompt').value='';
+  showMsg('Form oluşturuldu! Kaydetmeyi unutmayın.','success');
+};
+
+function showMsg(text,type){
+  const el=document.getElementById('msg-area');
+  el.innerHTML=`<div class="msg ${type}">${text}</div>`;
+  setTimeout(()=>{el.innerHTML='';},4000);
+}
+</script>
+</body>
+</html>
